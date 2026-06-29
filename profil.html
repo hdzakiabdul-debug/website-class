@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Profil Alumni - Portal Alumni</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+<style>
+/* ============================================================
+   ROOT VARIABLES
+   ============================================================ */
+:root {
+    --accent: #4F6EF7;
+    --accent-2: #7C3AED;
+    --accent-light: rgba(79,110,247,.1);
+    --accent-hover: #3B5BDB;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --shadow-xs: 0 1px 3px rgba(0,0,0,.06);
+    --shadow-sm: 0 2px 8px rgba(0,0,0,.08);
+    --shadow-md: 0 8px 24px rgba(0,0,0,.1);
+    --shadow-lg: 0 16px 48px rgba(0,0,0,.15);
+    --tr: .18s ease;
+}
+
+[data-theme="light"] {
+    --bg: #F4F6FB;
+    --bg2: #EBEDF5;
+    --surface: #FFFFFF;
+    --surface2: #F8F9FC;
+    --border: #E4E8F0;
+    --text: #111827;
+    --text2: #4B5563;
+    --text3: #9CA3AF;
+    --nav-bg: rgba(255,255,255,.92);
+}
+
+[data-theme="dark"] {
+    --bg: #0F1117;
+    --bg2: #1A1D27;
+    --surface: #1E2130;
+    --surface2: #252838;
+    --border: #2E3248;
+    --text: #F1F3F9;
+    --text2: #A0A8C0;
+    --text3: #6B7399;
+    --nav-bg: rgba(30,33,48,.94);
+}
+
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    transition: background var(--tr), color var(--tr);
+}
+a { text-decoration: none; color: inherit; }
+img { display: block; max-width: 100%; }
+button { font-family: inherit; cursor: pointer; }
+ul { list-style: none; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--bg2); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+/* ============================================================
+   NAVBAR
+   ============================================================ */
+.navbar {
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    background: var(--nav-bg);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+.nav-inner {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 0 24px;
+    height: 62px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+.brand-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+.brand-name {
+    font-weight: 800;
+    font-size: 17px;
+    color: var(--text);
+    letter-spacing: -.02em;
+}
+.brand-name span { color: var(--accent); }
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+.nav-links a {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 13px;
+    border-radius: 9px;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--text2);
+    transition: all var(--tr);
+}
+.nav-links a:hover,
+.nav-links a.active {
+    background: var(--accent-light);
+    color: var(--accent);
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 18px;
+    border-radius: 9px;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all var(--tr);
+    font-family: inherit;
+}
+.btn-primary {
+    background: var(--accent);
+    color: #fff;
+}
+.btn-primary:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(79,110,247,.35);
+}
+.btn-sm { padding: 7px 14px; font-size: 12.5px; }
+.btn-outline {
+    background: transparent;
+    color: var(--accent);
+    border: 1.5px solid var(--accent);
+}
+.btn-outline:hover { background: var(--accent-light); }
+
+.theme-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text2);
+    font-size: 14px;
+    transition: all var(--tr);
+}
+.theme-btn:hover {
+    background: var(--accent-light);
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+.hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    background: none;
+    border: none;
+    padding: 6px;
+}
+.hamburger span {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: var(--text2);
+    border-radius: 2px;
+    transition: all .25s;
+}
+
+@media (max-width: 768px) {
+    .hamburger { display: flex; }
+    .nav-links {
+        display: none;
+        position: fixed;
+        top: 62px;
+        left: 0;
+        right: 0;
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        flex-direction: column;
+        padding: 12px 16px 20px;
+        gap: 4px;
+        box-shadow: var(--shadow-md);
+        z-index: 199;
+    }
+    .nav-links.open { display: flex; }
+    .nav-links a { width: 100%; padding: 10px 14px; }
+}
+
+/* ============================================================
+   WRAPPER
+   ============================================================ */
+.wrap {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+@media (max-width: 640px) { .wrap { padding: 0 16px; } }
+
+/* ============================================================
+   PROFILE SECTION
+   ============================================================ */
+.profile-section {
+    padding: 32px 0 48px;
+}
+
+/* Profile Header */
+.profile-header {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 40px;
+    display: flex;
+    align-items: center;
+    gap: 36px;
+    box-shadow: var(--shadow-xs);
+    margin-bottom: 32px;
+}
+.profile-header .avatar {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid var(--accent-light);
+    flex-shrink: 0;
+}
+.profile-header .info { flex: 1; }
+.profile-header .info .name {
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--text);
+    letter-spacing: -.02em;
+}
+.profile-header .info .sub {
+    font-size: 15px;
+    color: var(--text2);
+    margin-top: 4px;
+}
+.profile-header .info .sub i { color: var(--accent); width: 18px; }
+.profile-header .info .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px 28px;
+    margin-top: 12px;
+}
+.profile-header .info .meta span {
+    font-size: 14px;
+    color: var(--text3);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.profile-header .info .meta span i { color: var(--accent); width: 16px; }
+.profile-header .info .bio {
+    margin-top: 14px;
+    padding: 12px 16px;
+    background: var(--bg2);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    color: var(--text2);
+    line-height: 1.7;
+    border: 1px solid var(--border);
+}
+.profile-header .info .role-badge {
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 8px;
+}
+.role-badge.owner { background: #FEF3C7; color: #92400E; }
+.role-badge.admin { background: #DBEAFE; color: #1E40AF; }
+.role-badge.moderator { background: #EDE9FE; color: #4C1D95; }
+.role-badge.alumni { background: #D1FAE5; color: #065F46; }
+[data-theme="dark"] .role-badge.owner { background: #78350F; color: #FCD34D; }
+[data-theme="dark"] .role-badge.admin { background: #1E3A5F; color: #93C5FD; }
+[data-theme="dark"] .role-badge.moderator { background: #2D1B69; color: #C4B5FD; }
+[data-theme="dark"] .role-badge.alumni { background: #064E3B; color: #6EE7B7; }
+
+@media (max-width: 640px) {
+    .profile-header { flex-direction: column; text-align: center; padding: 28px 20px; }
+    .profile-header .info .meta { justify-content: center; }
+    .profile-header .avatar { width: 110px; height: 110px; }
+}
+
+/* Profile Content */
+.profile-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+}
+@media (max-width: 768px) {
+    .profile-content { grid-template-columns: 1fr; }
+}
+
+/* Card */
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px 28px;
+    box-shadow: var(--shadow-xs);
+}
+.card-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 16px;
+}
+.card-title i { color: var(--accent); margin-right: 8px; }
+
+/* Detail Items */
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 24px;
+}
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.detail-item .label {
+    font-size: 11.5px;
+    color: var(--text3);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+.detail-item .value {
+    font-size: 14px;
+    color: var(--text);
+    font-weight: 500;
+}
+.detail-item .value i { color: var(--accent); width: 16px; }
+@media (max-width: 480px) {
+    .detail-grid { grid-template-columns: 1fr; }
+}
+
+/* Struktur List */
+.struktur-list { display: flex; flex-direction: column; gap: 10px; }
+.struktur-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    background: var(--bg2);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+}
+.struktur-item .icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+.struktur-item .info { flex: 1; }
+.struktur-item .info .jabatan {
+    font-size: 11px;
+    color: var(--text3);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+.struktur-item .info .nama {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+}
+.struktur-item .info .wakil {
+    font-size: 12px;
+    color: var(--text2);
+}
+
+/* Album Grid */
+.album-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+}
+.album-mini {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    cursor: pointer;
+    transition: all .2s;
+}
+.album-mini:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-sm);
+}
+.album-mini .thumb {
+    aspect-ratio: 1/1;
+    background: var(--bg2);
+    overflow: hidden;
+}
+.album-mini .thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.album-mini .info {
+    padding: 8px 10px;
+}
+.album-mini .info .title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.album-mini .info .sub {
+    font-size: 10.5px;
+    color: var(--text3);
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 32px 20px;
+}
+.empty-state i {
+    font-size: 32px;
+    color: var(--text3);
+    display: block;
+    margin-bottom: 8px;
+}
+.empty-state p {
+    font-size: 13px;
+    color: var(--text3);
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+footer {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    margin-top: 48px;
+}
+.footer-inner {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 24px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+.footer-copy {
+    font-size: 13px;
+    color: var(--text3);
+}
+.footer-copy strong { color: var(--accent); font-weight: 700; }
+
+/* ============================================================
+   LOADING
+   ============================================================ */
+#pageLoader {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: var(--surface);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+}
+.loader-ring {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loader-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text3);
+}
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+.toast-container {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.toast {
+    padding: 14px 20px;
+    border-radius: var(--radius-sm);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: var(--shadow-md);
+    animation: slideIn .3s ease;
+    min-width: 280px;
+    max-width: 400px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.toast-success { background: #059669; }
+.toast-error { background: #DC2626; }
+.toast-warning { background: #D97706; }
+.toast-info { background: var(--accent); }
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(40px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+.toast .toast-close {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: rgba(255,255,255,.7);
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0 4px;
+}
+.toast .toast-close:hover { color: #fff; }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+   LOADER
+   ============================================================ -->
+<div id="pageLoader">
+    <div class="loader-ring"></div>
+    <p class="loader-text">Memuat profil...</p>
+</div>
+
+<!-- ============================================================
+   NAVBAR
+   ============================================================ -->
+<nav class="navbar">
+    <div class="nav-inner">
+        <a href="index.html" class="brand">
+            <div class="brand-icon"><i class="fas fa-graduation-cap"></i></div>
+            <span class="brand-name">Portal<span>Alumni</span></span>
+        </a>
+
+        <button class="hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')">
+            <span></span><span></span><span></span>
+        </button>
+
+        <ul class="nav-links" id="navLinks">
+            <li><a href="index.html"><i class="fas fa-home"></i> Beranda</a></li>
+            <li><a href="index.html#alumni"><i class="fas fa-users"></i> Alumni</a></li>
+            <li><a href="index.html#album"><i class="fas fa-images"></i> Album</a></li>
+            <li><a href="index.html#struktur"><i class="fas fa-sitemap"></i> Struktur</a></li>
+        </ul>
+
+        <div class="nav-right">
+            <button class="theme-btn" onclick="toggleTheme()" title="Ganti tema">
+                <i id="themeIcon" class="fas fa-moon"></i>
+            </button>
+            <a href="login.html" class="btn btn-primary btn-sm" id="loginBtn">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </a>
+            <a href="dashboard_alumni.html" class="btn btn-outline btn-sm" id="dashboardBtn" style="display:none;">
+                <i class="fas fa-th-large"></i> Dashboard
+            </a>
+        </div>
+    </div>
+</nav>
+
+<!-- ============================================================
+   MAIN CONTENT
+   ============================================================ -->
+<main>
+    <section class="profile-section wrap">
+        <!-- Profile Header -->
+        <div class="profile-header" id="profileHeader">
+            <img class="avatar" id="avatar" src="https://ui-avatars.com/api/?name=Alumni&background=4F6EF7&color=fff&size=140" alt="Profile"/>
+            <div class="info">
+                <div class="name" id="profileName">Alumni</div>
+                <div class="sub"><i class="fas fa-id-card"></i> NIS: <span id="profileNis">—</span></div>
+                <div class="meta">
+                    <span><i class="fas fa-door-open"></i> <span id="profileKelas">—</span></span>
+                    <span><i class="fas fa-layer-group"></i> <span id="profileAngkatan">—</span></span>
+                    <span><i class="fas fa-briefcase"></i> <span id="profilePekerjaan">—</span></span>
+                    <span><i class="fas fa-calendar-alt"></i> Bergabung: <span id="profileJoined">—</span></span>
+                </div>
+                <div class="role-badge" id="profileRole">Alumni</div>
+                <div class="bio" id="profileBio">Tidak ada bio</div>
+            </div>
+        </div>
+
+        <!-- Profile Content -->
+        <div class="profile-content">
+            <!-- Left Column -->
+            <div>
+                <!-- Detail Informasi -->
+                <div class="card" style="margin-bottom:24px">
+                    <div class="card-title"><i class="fas fa-info-circle"></i> Informasi Lengkap</div>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <span class="label">Nama Lengkap</span>
+                            <span class="value" id="detailNama">—</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">NIS</span>
+                            <span class="value" id="detailNis">—</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Jenis Kelamin</span>
+                            <span class="value" id="detailJk">—</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Tempat, Tanggal Lahir</span>
+                            <span class="value" id="detailTtl">—</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Alamat</span>
+                            <span class="value" id="detailAlamat">—</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">No Telepon</span>
+                            <span class="value" id="detailTelp">—</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Email</span>
+                            <span class="value" id="detailEmail">—</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Pekerjaan</span>
+                            <span class="value" id="detailPekerjaan">—</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Perusahaan</span>
+                            <span class="value" id="detailPerusahaan">—</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Status</span>
+                            <span class="value" id="detailStatus">—</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Struktur Organisasi -->
+                <div class="card" style="margin-bottom:24px">
+                    <div class="card-title"><i class="fas fa-sitemap"></i> Struktur Organisasi</div>
+                    <div id="strukturContainer">
+                        <div class="empty-state">
+                            <i class="fas fa-sitemap"></i>
+                            <p>Tidak ada struktur organisasi</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div>
+                <!-- Album Terbaru -->
+                <div class="card" style="margin-bottom:24px">
+                    <div class="card-title"><i class="fas fa-images"></i> Album Terbaru</div>
+                    <div class="album-grid" id="albumContainer">
+                        <div class="empty-state" style="grid-column:1/-1">
+                            <i class="fas fa-images"></i>
+                            <p>Belum ada album</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- ============================================================
+   FOOTER
+   ============================================================ -->
+<footer>
+    <div class="footer-inner">
+        <a href="index.html" class="brand">
+            <div class="brand-icon"><i class="fas fa-graduation-cap"></i></div>
+            <span class="brand-name">Portal<span>Alumni</span></span>
+        </a>
+        <p class="footer-copy" id="footerCopy">© 2026 XREZZKY OFFICIAL. All Rights Reserved.</p>
+    </div>
+</footer>
+
+<!-- ============================================================
+   TOAST CONTAINER
+   ============================================================ -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ============================================================
+   JAVASCRIPT
+   ============================================================ -->
+<script>
+// ============================================================
+// 1. SUPABASE INIT
+// ============================================================
+const SB_URL = 'https://zcmjheeafmtrzyhyhkcg.supabase.co';
+const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjbWpoZWVhZm10cnp5aHloa2NnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1OTY5MDksImV4cCI6MjA5ODE3MjkwOX0.j60lA9VDiTyp42IN8iDsDGu6Qf5EebgYloocFrZqEn4';
+const sb = window.supabase.createClient(SB_URL, SB_ANON);
+
+// ============================================================
+// 2. STATE
+// ============================================================
+let currentUser = null;
+let alumniData = null;
+let allAlbum = [];
+let allStruktur = [];
+let allKelas = [];
+let allAngkatan = [];
+
+// ============================================================
+// 3. THEME
+// ============================================================
+function isDark() {
+    return document.documentElement.getAttribute('data-theme') === 'dark';
+}
+function toggleTheme() {
+    const n = isDark() ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', n);
+    document.getElementById('themeIcon').className = n === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+    localStorage.setItem('pa_theme', n);
+}
+function initTheme() {
+    const s = localStorage.getItem('pa_theme') || 'light';
+    document.documentElement.setAttribute('data-theme', s);
+    document.getElementById('themeIcon').className = s === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+}
+
+// ============================================================
+// 4. CHECK SESSION
+// ============================================================
+function checkSession() {
+    try {
+        const session = localStorage.getItem('userSession');
+        if (session) {
+            currentUser = JSON.parse(session);
+            const loginBtn = document.getElementById('loginBtn');
+            const dashboardBtn = document.getElementById('dashboardBtn');
+
+            if (currentUser && currentUser.role) {
+                loginBtn.style.display = 'none';
+                dashboardBtn.style.display = 'inline-flex';
+                dashboardBtn.href = currentUser.role === 'owner' ? 'dashboard_owner.html' :
+                                   currentUser.role === 'admin' ? 'dashboard_admin.html' :
+                                   currentUser.role === 'moderator' ? 'dashboard_moderator.html' :
+                                   'dashboard_alumni.html';
+            }
+        }
+    } catch (e) {}
+}
+
+// ============================================================
+// 5. GET ALUMNI ID FROM URL
+// ============================================================
+function getAlumniIdFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('id');
+}
+
+// ============================================================
+// 6. FORMAT DATE
+// ============================================================
+function formatDate(date) {
+    if (!date) return '—';
+    const d = new Date(date);
+    return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function formatDateShort(date) {
+    if (!date) return '—';
+    const d = new Date(date);
+    return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+// ============================================================
+// 7. GET KELAS/ANGKATAN NAME
+// ============================================================
+function getKelasName(id) {
+    const k = allKelas.find(k => k.id === id);
+    return k ? k.nama_kelas : '—';
+}
+
+function getAngkatanName(id) {
+    const a = allAngkatan.find(a => a.id === id);
+    return a ? a.nama : '—';
+}
+
+function getRoleBadge(role) {
+    const map = {
+        'owner': 'owner',
+        'admin': 'admin',
+        'moderator': 'moderator',
+        'alumni': 'alumni'
+    };
+    return map[role] || 'alumni';
+}
+
+// ============================================================
+// 8. FETCH DATA
+// ============================================================
+async function fetchData() {
+    try {
+        const alumniId = getAlumniIdFromUrl();
+
+        // Fetch semua data
+        const [k, ang, alb, str] = await Promise.all([
+            sb.from('kelas').select('*'),
+            sb.from('angkatan').select('*'),
+            sb.from('album').select('*').eq('status', 'published').order('created_at', { ascending: false }),
+            sb.from('struktur_organisasi').select('*')
+        ]);
+
+        allKelas = k.data || [];
+        allAngkatan = ang.data || [];
+        allAlbum = alb.data || [];
+        allStruktur = str.data || [];
+
+        // Fetch alumni data
+        let query = sb.from('alumni').select('*');
+        if (alumniId) {
+            query = query.eq('id', alumniId);
+        } else {
+            // If no id, try to get from session or get first alumni
+            if (currentUser) {
+                query = query.eq('pengguna_id', currentUser.id);
+            } else {
+                // Get first alumni as fallback
+                query = query.limit(1);
+            }
+        }
+
+        const { data, error } = await query.maybeSingle();
+
+        if (error) {
+            console.error('Error fetching alumni:', error);
+            showToast('Gagal memuat data alumni', 'error');
+            return;
+        }
+
+        if (!data) {
+            document.getElementById('profileHeader').innerHTML = `
+                <div style="text-align:center;padding:40px;width:100%">
+                    <i class="fas fa-user-slash" style="font-size:48px;color:var(--text3);display:block;margin-bottom:12px"></i>
+                    <h3 style="font-size:20px;font-weight:700;color:var(--text)">Alumni Tidak Ditemukan</h3>
+                    <p style="color:var(--text3);margin-top:4px">Data alumni tidak tersedia</p>
+                    <a href="index.html" class="btn btn-primary" style="margin-top:16px">Kembali ke Beranda</a>
+                </div>
+            `;
+            document.getElementById('pageLoader').style.display = 'none';
+            return;
+        }
+
+        alumniData = data;
+        renderProfile();
+        renderStruktur();
+        renderAlbum();
+
+    } catch (e) {
+        console.error('Error:', e);
+        showToast('Gagal memuat data: ' + e.message, 'error');
+    } finally {
+        document.getElementById('pageLoader').style.display = 'none';
+    }
+}
+
+// ============================================================
+// 9. RENDER PROFILE
+// ============================================================
+function renderProfile() {
+    const d = alumniData;
+    if (!d) return;
+
+    // Header
+    const avatar = d.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(d.nama_lengkap || 'Alumni')}&background=4F6EF7&color=fff&size=140`;
+    document.getElementById('avatar').src = avatar;
+    document.getElementById('avatar').onerror = function() {
+        this.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(d.nama_lengkap || 'Alumni')}&background=4F6EF7&color=fff&size=140`;
+    };
+
+    document.getElementById('profileName').textContent = d.nama_lengkap || 'Alumni';
+    document.getElementById('profileNis').textContent = d.nis || '—';
+    document.getElementById('profileKelas').textContent = getKelasName(d.kelas_id);
+    document.getElementById('profileAngkatan').textContent = getAngkatanName(d.angkatan_id);
+    document.getElementById('profilePekerjaan').textContent = d.pekerjaan || '—';
+    document.getElementById('profileJoined').textContent = formatDateShort(d.created_at);
+
+    // Role
+    const roleBadge = document.getElementById('profileRole');
+    const role = d.role || 'alumni';
+    roleBadge.textContent = role.charAt(0).toUpperCase() + role.slice(1);
+    roleBadge.className = `role-badge ${getRoleBadge(role)}`;
+
+    // Bio
+    document.getElementById('profileBio').textContent = d.bio || 'Tidak ada bio';
+
+    // Detail
+    document.getElementById('detailNama').textContent = d.nama_lengkap || '—';
+    document.getElementById('detailNis').textContent = d.nis || '—';
+    document.getElementById('detailJk').textContent = d.jenis_kelamin || '—';
+    document.getElementById('detailTtl').textContent = d.tempat_lahir && d.tanggal_lahir ?
+        `${d.tempat_lahir}, ${formatDate(d.tanggal_lahir)}` :
+        d.tempat_lahir || d.tanggal_lahir || '—';
+    document.getElementById('detailAlamat').textContent = d.alamat || '—';
+    document.getElementById('detailTelp').textContent = d.no_telepon || '—';
+    document.getElementById('detailEmail').textContent = d.email || '—';
+    document.getElementById('detailPekerjaan').textContent = d.pekerjaan || '—';
+    document.getElementById('detailPerusahaan').textContent = d.perusahaan || '—';
+    document.getElementById('detailStatus').textContent = d.status || '—';
+}
+
+// ============================================================
+// 10. RENDER STRUKTUR
+// ============================================================
+function renderStruktur() {
+    const container = document.getElementById('strukturContainer');
+
+    // Filter struktur berdasarkan kelas alumni
+    const filtered = allStruktur.filter(s => s.kelas_id === alumniData.kelas_id);
+
+    if (!filtered.length) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-sitemap"></i>
+                <p>Tidak ada struktur organisasi untuk kelas ini</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = filtered.map(s => `
+        <div class="struktur-item">
+            <div class="icon" style="background:var(--accent-light);color:var(--accent)">
+                <i class="fas fa-user-tie"></i>
+            </div>
+            <div class="info">
+                <div class="jabatan">${s.jabatan || '—'}</div>
+                <div class="nama">${s.nama || '—'}</div>
+                ${s.wakil ? `<div class="wakil"><i class="fas fa-arrow-right" style="font-size:9px;color:var(--text3)"></i> Wakil: ${s.wakil}</div>` : ''}
+            </div>
+        </div>
+    `).join('');
+}
+
+// ============================================================
+// 11. RENDER ALBUM
+// ============================================================
+function renderAlbum() {
+    const container = document.getElementById('albumContainer');
+
+    // Filter album berdasarkan kelas alumni
+    const filtered = allAlbum.filter(a => a.kelas_id === alumniData.kelas_id);
+
+    if (!filtered.length) {
+        container.innerHTML = `
+            <div class="empty-state" style="grid-column:1/-1">
+                <i class="fas fa-images"></i>
+                <p>Belum ada album untuk kelas ini</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = filtered.slice(0, 4).map(a => `
+        <div class="album-mini" onclick="window.location.href='index.html#album'">
+            <div class="thumb">
+                <img src="${a.cover || 'https://placehold.co/400x400/EEF2FF/4F6EF7?text=Album'}" alt="${a.judul}" loading="lazy" onerror="this.src='https://placehold.co/400x400/EEF2FF/4F6EF7?text=Error'"/>
+            </div>
+            <div class="info">
+                <div class="title">${a.judul}</div>
+                <div class="sub">${a.tahun || formatDateShort(a.created_at)}</div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// ============================================================
+// 12. TOAST
+// ============================================================
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    const icons = {
+        success: 'fa-check-circle',
+        error: 'fa-exclamation-circle',
+        warning: 'fa-exclamation-triangle',
+        info: 'fa-info-circle'
+    };
+    toast.innerHTML = `
+        <i class="fas ${icons[type] || 'fa-info-circle'}"></i>
+        <span>${message}</span>
+        <button class="toast-close" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
+    `;
+    container.appendChild(toast);
+    setTimeout(() => {
+        if (toast.parentElement) toast.remove();
+    }, 5000);
+}
+
+// ============================================================
+// 13. INIT
+// ============================================================
+initTheme();
+checkSession();
+fetchData();
+
+// Smooth scroll for nav
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            document.getElementById('navLinks').classList.remove('open');
+        }
+    });
+});
+</script>
+</body>
+  </html>
