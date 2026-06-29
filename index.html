@@ -4,16 +4,9 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Portal Alumni</title>
-<meta name="description" content="Portal Alumni - Menjaga Silaturahmi Alumni"/>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>"/>
-
-<!-- Fonts & Icons -->
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-
-<!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
-
 <style>
 /* ============================================================
    ROOT VARIABLES
@@ -21,7 +14,7 @@
 :root {
     --accent: #4F6EF7;
     --accent-2: #7C3AED;
-    --accent-light: rgba(79, 110, 247, 0.1);
+    --accent-light: rgba(79,110,247,.1);
     --accent-hover: #3B5BDB;
     --radius: 16px;
     --radius-sm: 10px;
@@ -42,7 +35,6 @@
     --text2: #4B5563;
     --text3: #9CA3AF;
     --nav-bg: rgba(255,255,255,.92);
-    --card-shadow: 0 1px 3px rgba(0,0,0,.06);
 }
 
 [data-theme="dark"] {
@@ -55,20 +47,13 @@
     --text2: #A0A8C0;
     --text3: #6B7399;
     --nav-bg: rgba(30,33,48,.94);
-    --card-shadow: 0 1px 3px rgba(0,0,0,.3);
 }
 
 /* ============================================================
    RESET & BASE
    ============================================================ */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-html {
-    scroll-behavior: smooth;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
 body {
     font-family: 'Plus Jakarta Sans', sans-serif;
     background: var(--bg);
@@ -76,37 +61,16 @@ body {
     min-height: 100vh;
     transition: background var(--tr), color var(--tr);
 }
-a {
-    text-decoration: none;
-    color: inherit;
-}
-img {
-    display: block;
-    max-width: 100%;
-}
-button {
-    font-family: inherit;
-    cursor: pointer;
-}
-ul {
-    list-style: none;
-}
+a { text-decoration: none; color: inherit; }
+img { display: block; max-width: 100%; }
+button { font-family: inherit; cursor: pointer; }
+ul { list-style: none; }
 
 /* Scrollbar */
-::-webkit-scrollbar {
-    width: 5px;
-    height: 5px;
-}
-::-webkit-scrollbar-track {
-    background: var(--bg2);
-}
-::-webkit-scrollbar-thumb {
-    background: var(--border);
-    border-radius: 99px;
-}
-::-webkit-scrollbar-thumb:hover {
-    background: var(--text3);
-}
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--bg2); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text3); }
 
 /* ============================================================
    LOADER
@@ -130,9 +94,7 @@ ul {
     border-top-color: var(--accent);
     animation: spin .7s linear infinite;
 }
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 .loader-text {
     font-size: 14px;
     font-weight: 600;
@@ -185,9 +147,7 @@ ul {
     color: var(--text);
     letter-spacing: -.02em;
 }
-.brand-name span {
-    color: var(--accent);
-}
+.brand-name span { color: var(--accent); }
 
 .nav-links {
     display: flex;
@@ -217,7 +177,6 @@ ul {
     gap: 8px;
 }
 
-/* Buttons */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -238,42 +197,15 @@ ul {
 .btn-primary:hover {
     background: var(--accent-hover);
     transform: translateY(-1px);
-    box-shadow: 0 4px 16px rgba(79, 110, 247, .35);
+    box-shadow: 0 4px 16px rgba(79,110,247,.35);
 }
-.btn-sm {
-    padding: 7px 14px;
-    font-size: 12.5px;
-}
+.btn-sm { padding: 7px 14px; font-size: 12.5px; }
 .btn-outline {
     background: transparent;
     color: var(--accent);
     border: 1.5px solid var(--accent);
 }
-.btn-outline:hover {
-    background: var(--accent-light);
-}
-.btn-white {
-    background: #fff;
-    color: var(--accent);
-    font-weight: 700;
-}
-.btn-white:hover {
-    background: #f0f4ff;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 16px rgba(0,0,0,.15);
-}
-.btn-glass {
-    background: rgba(255,255,255,.15);
-    color: #fff;
-    border: 1.5px solid rgba(255,255,255,.3);
-}
-.btn-glass:hover {
-    background: rgba(255,255,255,.25);
-}
-.btn-sm {
-    padding: 7px 14px;
-    font-size: 12.5px;
-}
+.btn-outline:hover { background: var(--accent-light); }
 
 .theme-btn {
     width: 36px;
@@ -311,11 +243,8 @@ ul {
     transition: all .25s;
 }
 
-/* Mobile Nav */
 @media (max-width: 768px) {
-    .hamburger {
-        display: flex;
-    }
+    .hamburger { display: flex; }
     .nav-links {
         display: none;
         position: fixed;
@@ -330,13 +259,8 @@ ul {
         box-shadow: var(--shadow-md);
         z-index: 199;
     }
-    .nav-links.open {
-        display: flex;
-    }
-    .nav-links a {
-        width: 100%;
-        padding: 10px 14px;
-    }
+    .nav-links.open { display: flex; }
+    .nav-links a { width: 100%; padding: 10px 14px; }
 }
 
 /* ============================================================
@@ -347,21 +271,13 @@ ul {
     margin: 0 auto;
     padding: 0 24px;
 }
-@media (max-width: 640px) {
-    .wrap {
-        padding: 0 16px;
-    }
-}
-.section {
-    padding: 32px 0;
-}
+@media (max-width: 640px) { .wrap { padding: 0 16px; } }
+.section { padding: 32px 0; }
 
 /* ============================================================
    HERO
    ============================================================ */
-.hero {
-    padding: 36px 0 28px;
-}
+.hero { padding: 36px 0 28px; }
 .hero-card {
     background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
     border-radius: 24px;
@@ -440,13 +356,8 @@ ul {
     flex-shrink: 0;
 }
 @media (max-width: 640px) {
-    .hero-card {
-        grid-template-columns: 1fr;
-        padding: 28px 24px;
-    }
-    .hero-orb {
-        display: none;
-    }
+    .hero-card { grid-template-columns: 1fr; padding: 28px 24px; }
+    .hero-orb { display: none; }
 }
 
 /* ============================================================
@@ -459,9 +370,7 @@ ul {
     margin-bottom: 36px;
 }
 @media (max-width: 640px) {
-    .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
 }
 .stat-card {
     background: var(--surface);
@@ -483,38 +392,14 @@ ul {
     font-size: 18px;
     flex-shrink: 0;
 }
-.ico-blue {
-    background: #EEF2FF;
-    color: var(--accent);
-}
-.ico-green {
-    background: #ECFDF5;
-    color: #059669;
-}
-.ico-orange {
-    background: #FFF7ED;
-    color: #EA580C;
-}
-.ico-purple {
-    background: #F5F3FF;
-    color: #7C3AED;
-}
-[data-theme="dark"] .ico-blue {
-    background: #1e2547;
-    color: #7b9bff;
-}
-[data-theme="dark"] .ico-green {
-    background: #062d1c;
-    color: #34d399;
-}
-[data-theme="dark"] .ico-orange {
-    background: #2d1a06;
-    color: #fb923c;
-}
-[data-theme="dark"] .ico-purple {
-    background: #1e1330;
-    color: #a78bfa;
-}
+.ico-blue { background: #EEF2FF; color: var(--accent); }
+.ico-green { background: #ECFDF5; color: #059669; }
+.ico-orange { background: #FFF7ED; color: #EA580C; }
+.ico-purple { background: #F5F3FF; color: #7C3AED; }
+[data-theme="dark"] .ico-blue { background: #1e2547; color: #7b9bff; }
+[data-theme="dark"] .ico-green { background: #062d1c; color: #34d399; }
+[data-theme="dark"] .ico-orange { background: #2d1a06; color: #fb923c; }
+[data-theme="dark"] .ico-purple { background: #1e1330; color: #a78bfa; }
 .stat-val {
     font-size: 24px;
     font-weight: 900;
@@ -545,9 +430,7 @@ ul {
     color: var(--text);
     letter-spacing: -.02em;
 }
-.sec-title i {
-    color: var(--accent);
-}
+.sec-title i { color: var(--accent); }
 .sec-sub {
     font-size: 13px;
     color: var(--text3);
@@ -565,10 +448,7 @@ ul {
     margin-bottom: 36px;
 }
 @media (max-width: 480px) {
-    .alumni-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-    }
+    .alumni-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
 }
 .alumni-card {
     background: var(--surface);
@@ -578,6 +458,7 @@ ul {
     text-align: center;
     box-shadow: var(--shadow-xs);
     transition: all .2s;
+    cursor: pointer;
 }
 .alumni-card:hover {
     transform: translateY(-3px);
@@ -611,18 +492,9 @@ ul {
     background: var(--accent-light);
     color: var(--accent);
 }
-.alumni-badge.owner {
-    background: #FEF3C7;
-    color: #D97706;
-}
-.alumni-badge.admin {
-    background: #EFF6FF;
-    color: #2563EB;
-}
-.alumni-badge.moderator {
-    background: #F3E8FF;
-    color: #7C3AED;
-}
+.alumni-badge.owner { background: #FEF3C7; color: #D97706; }
+.alumni-badge.admin { background: #EFF6FF; color: #2563EB; }
+.alumni-badge.moderator { background: #F3E8FF; color: #7C3AED; }
 
 /* ============================================================
    ALBUM GRID
@@ -634,10 +506,7 @@ ul {
     margin-bottom: 36px;
 }
 @media (max-width: 480px) {
-    .album-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-    }
+    .album-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
 }
 .album-card {
     background: var(--surface);
@@ -664,9 +533,7 @@ ul {
     object-fit: cover;
     transition: transform .35s;
 }
-.album-card:hover .album-thumb img {
-    transform: scale(1.07);
-}
+.album-card:hover .album-thumb img { transform: scale(1.07); }
 .album-info {
     padding: 12px 14px;
 }
@@ -694,13 +561,10 @@ ul {
     color: var(--text3);
     margin-top: 6px;
 }
-.album-meta i {
-    color: var(--accent);
-    font-size: 10.5px;
-}
+.album-meta i { color: var(--accent); font-size: 10.5px; }
 
 /* ============================================================
-   STRUKTUR ORGANISASI
+   STRUKTUR
    ============================================================ */
 .struktur-grid {
     display: grid;
@@ -730,6 +594,8 @@ ul {
     justify-content: center;
     font-size: 20px;
     margin: 0 auto 10px;
+    background: var(--accent-light);
+    color: var(--accent);
 }
 .struktur-jabatan {
     font-size: 11px;
@@ -767,19 +633,14 @@ ul {
     box-shadow: var(--shadow-xs);
     transition: all .2s;
 }
-.pengumuman-card:hover {
-    box-shadow: var(--shadow-sm);
-}
+.pengumuman-card:hover { box-shadow: var(--shadow-sm); }
 .pengumuman-title {
     font-size: 16px;
     font-weight: 700;
     color: var(--text);
     margin-bottom: 6px;
 }
-.pengumuman-title i {
-    color: var(--accent);
-    margin-right: 8px;
-}
+.pengumuman-title i { color: var(--accent); margin-right: 8px; }
 .pengumuman-date {
     font-size: 12px;
     color: var(--text3);
@@ -794,46 +655,6 @@ ul {
     max-width: 100%;
     border-radius: var(--radius-sm);
     margin: 10px 0;
-}
-
-/* ============================================================
-   SEARCH
-   ============================================================ */
-.search-wrap {
-    position: relative;
-}
-.search-wrap i {
-    position: absolute;
-    left: 13px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text3);
-    font-size: 12.5px;
-    pointer-events: none;
-}
-.search-input {
-    background: var(--surface);
-    border: 1.5px solid var(--border);
-    border-radius: 10px;
-    padding: 9px 14px 9px 36px;
-    font-size: 13.5px;
-    font-family: inherit;
-    color: var(--text);
-    width: 240px;
-    transition: all var(--tr);
-}
-.search-input:focus {
-    outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(79, 110, 247, .12);
-}
-.search-input::placeholder {
-    color: var(--text3);
-}
-@media (max-width: 480px) {
-    .search-input {
-        width: 100%;
-    }
 }
 
 /* ============================================================
@@ -881,10 +702,7 @@ ul {
     pointer-events: none;
     transition: opacity .25s;
 }
-.lightbox.open {
-    opacity: 1;
-    pointer-events: all;
-}
+.lightbox.open { opacity: 1; pointer-events: all; }
 .lb-box {
     background: var(--surface);
     border-radius: 22px;
@@ -898,9 +716,7 @@ ul {
     transform: scale(.93) translateY(20px);
     transition: transform .25s;
 }
-.lightbox.open .lb-box {
-    transform: scale(1) translateY(0);
-}
+.lightbox.open .lb-box { transform: scale(1) translateY(0); }
 .lb-header {
     display: flex;
     align-items: center;
@@ -931,14 +747,9 @@ ul {
     cursor: pointer;
     color: var(--text2);
     font-size: 14px;
-    flex-shrink: 0;
     transition: all var(--tr);
 }
-.lb-close:hover {
-    background: #fee2e2;
-    color: #dc2626;
-    border-color: #fca5a5;
-}
+.lb-close:hover { background: #fee2e2; color: #dc2626; border-color: #fca5a5; }
 .lb-media {
     flex: 1;
     background: #090d14;
@@ -949,15 +760,8 @@ ul {
     max-height: 58vh;
     overflow: hidden;
 }
-.lb-media img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-}
-.lb-media video {
-    max-width: 100%;
-    max-height: 100%;
-}
+.lb-media img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.lb-media video { max-width: 100%; max-height: 100%; }
 .lb-footer {
     padding: 16px 20px;
     border-top: 1px solid var(--border);
@@ -986,10 +790,7 @@ ul {
     padding: 4px 10px;
     border-radius: 99px;
 }
-.lb-tag i {
-    color: var(--accent);
-    font-size: 10px;
-}
+.lb-tag i { color: var(--accent); font-size: 10px; }
 .lb-nav {
     display: flex;
     align-items: center;
@@ -1016,10 +817,7 @@ ul {
     color: var(--accent);
     border-color: #c5d0f8;
 }
-.lb-nav-btn:disabled {
-    opacity: .35;
-    cursor: not-allowed;
-}
+.lb-nav-btn:disabled { opacity: .35; cursor: not-allowed; }
 .lb-counter {
     font-size: 13px;
     color: var(--text2);
@@ -1027,6 +825,40 @@ ul {
     min-width: 52px;
     text-align: center;
 }
+
+/* ============================================================
+   SEARCH
+   ============================================================ */
+.search-wrap {
+    position: relative;
+}
+.search-wrap i {
+    position: absolute;
+    left: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text3);
+    font-size: 12.5px;
+    pointer-events: none;
+}
+.search-input {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 9px 14px 9px 36px;
+    font-size: 13.5px;
+    font-family: inherit;
+    color: var(--text);
+    width: 240px;
+    transition: all var(--tr);
+}
+.search-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(79,110,247,.12);
+}
+.search-input::placeholder { color: var(--text3); }
+@media (max-width: 480px) { .search-input { width: 100%; } }
 
 /* ============================================================
    FOOTER
@@ -1050,10 +882,7 @@ footer {
     font-size: 13px;
     color: var(--text3);
 }
-.footer-copy strong {
-    color: var(--accent);
-    font-weight: 700;
-}
+.footer-copy strong { color: var(--accent); font-weight: 700; }
 .footer-socials {
     display: flex;
     gap: 8px;
@@ -1084,14 +913,8 @@ footer {
     animation: fadeUp .3s ease;
 }
 @keyframes fadeUp {
-    from {
-        opacity: 0;
-        transform: translateY(16px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 </style>
 </head>
@@ -1222,7 +1045,7 @@ footer {
         <div class="album-grid" id="albumContainer"></div>
     </section>
 
-    <!-- ========== STRUKTUR ORGANISASI ========== -->
+    <!-- ========== STRUKTUR ========== -->
     <section id="struktur" class="wrap section">
         <div class="sec-head">
             <div>
@@ -1290,6 +1113,11 @@ footer {
 </div>
 
 <!-- ============================================================
+   TOAST CONTAINER
+   ============================================================ -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ============================================================
    JAVASCRIPT
    ============================================================ -->
 <script>
@@ -1320,14 +1148,12 @@ let currentUser = null;
 function isDark() {
     return document.documentElement.getAttribute('data-theme') === 'dark';
 }
-
 function toggleTheme() {
     const n = isDark() ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', n);
     document.getElementById('themeIcon').className = n === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
     localStorage.setItem('pa_theme', n);
 }
-
 function initTheme() {
     const s = localStorage.getItem('pa_theme') || 'light';
     document.documentElement.setAttribute('data-theme', s);
@@ -1349,7 +1175,6 @@ function checkSession() {
                 loginBtn.style.display = 'none';
                 dashboardBtn.style.display = 'inline-flex';
                 
-                // Redirect sesuai role
                 const roleMap = {
                     'owner': 'dashboard_owner.html',
                     'admin': 'dashboard_admin.html',
@@ -1360,22 +1185,45 @@ function checkSession() {
                 dashboardBtn.innerHTML = `<i class="fas fa-th-large"></i> Dashboard`;
             }
         }
-    } catch (e) {
-        console.log('No session');
-    }
+    } catch (e) {}
 }
 
 // ============================================================
-// 5. FETCH DATA
+// 5. TOAST
+// ============================================================
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    const icons = {
+        success: 'fa-check-circle',
+        error: 'fa-exclamation-circle',
+        warning: 'fa-exclamation-triangle',
+        info: 'fa-info-circle'
+    };
+    toast.innerHTML = `
+        <i class="fas ${icons[type] || 'fa-info-circle'}"></i>
+        <span>${message}</span>
+        <button class="toast-close" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
+    `;
+    container.appendChild(toast);
+    setTimeout(() => {
+        if (toast.parentElement) toast.remove();
+    }, 5000);
+}
+
+// ============================================================
+// 6. FETCH DATA
 // ============================================================
 async function fetchAll() {
     try {
-        const [r1, r2, r3, r4, r5, r6] = await Promise.all([
+        const [r1, r2, r3, r4, r5, r6, r7] = await Promise.all([
             sb.from('alumni').select('*').order('nama_lengkap'),
             sb.from('kelas').select('*').order('nama_kelas'),
-            sb.from('album').select('*').order('created_at', { ascending: false }),
+            sb.from('album').select('*').eq('status', 'published').order('created_at', { ascending: false }),
             sb.from('struktur_organisasi').select('*').order('urutan'),
             sb.from('pengumuman').select('*').eq('status', 'published').order('created_at', { ascending: false }),
+            sb.from('angkatan').select('*').order('tahun', { ascending: false }),
             sb.from('site_config').select('*').limit(1).maybeSingle()
         ]);
 
@@ -1384,14 +1232,8 @@ async function fetchAll() {
         allAlbum = r3.data || [];
         allStruktur = r4.data || [];
         allPengumuman = r5.data || [];
-        siteConfig = r6.data || {};
-
-        // Ambil angkatan dari kelas
-        const angkatanIds = [...new Set(allKelas.map(k => k.angkatan_id).filter(Boolean))];
-        if (angkatanIds.length) {
-            const { data: angkatan } = await sb.from('angkatan').select('*').in('id', angkatanIds);
-            allAngkatan = angkatan || [];
-        }
+        allAngkatan = r6.data || [];
+        siteConfig = r7.data || {};
 
         applyConfig();
         renderStats();
@@ -1411,26 +1253,30 @@ async function fetchAll() {
 }
 
 // ============================================================
-// 6. APPLY CONFIG
+// 7. APPLY CONFIG
 // ============================================================
 function applyConfig() {
     const c = siteConfig;
     const nm = c.site_name || 'Portal Alumni';
     document.title = nm;
 
+    // Update brand name
     const parts = nm.split(' ');
     const html = parts[0] + (parts.slice(1).length ? '<span> ' + parts.slice(1).join(' ') + '</span>' : '<span></span>');
     document.getElementById('navBrand').innerHTML = html;
     document.getElementById('footerBrand').innerHTML = html;
 
+    // Hero
     if (c.hero_title) document.getElementById('heroTitle').innerHTML = c.hero_title.replace(/\\n/g, '<br/>');
     if (c.hero_desc) document.getElementById('heroDesc').textContent = c.hero_desc;
     if (c.hero_chip) document.getElementById('heroChip').textContent = c.hero_chip;
 
+    // Footer
     const year = new Date().getFullYear();
     const owner = c.owner_name || 'XREZZKY OFFICIAL';
     document.getElementById('footerCopy').innerHTML = `© ${year} ${owner}. All Rights Reserved.`;
 
+    // Social Media
     const socials = document.getElementById('footerSocials');
     socials.innerHTML = '';
     const socMap = {
@@ -1452,7 +1298,7 @@ function applyConfig() {
 }
 
 // ============================================================
-// 7. RENDER STATS
+// 8. RENDER STATS
 // ============================================================
 function renderStats() {
     document.getElementById('totalAlumni').textContent = allAlumni.length;
@@ -1462,7 +1308,7 @@ function renderStats() {
 }
 
 // ============================================================
-// 8. UTILITY FUNCTIONS
+// 9. UTILITY FUNCTIONS
 // ============================================================
 function avatarUrl(name, size = 80) {
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(name || '?')}&background=4F6EF7&color=fff&size=${size}`;
@@ -1494,7 +1340,7 @@ function getRoleBadge(role) {
 }
 
 // ============================================================
-// 9. RENDER ALUMNI
+// 10. RENDER ALUMNI
 // ============================================================
 function renderAlumni() {
     const container = document.getElementById('alumniContainer');
@@ -1507,7 +1353,7 @@ function renderAlumni() {
         const foto = a.foto || avatarUrl(a.nama_lengkap, 80);
         const roleBadge = getRoleBadge(a.role);
         return `
-            <div class="alumni-card" data-name="${a.nama_lengkap || ''}" data-nis="${a.nis || ''}">
+            <div class="alumni-card" data-name="${a.nama_lengkap || ''}" data-nis="${a.nis || ''}" onclick="window.location.href='profil.html?id=${a.id}'">
                 <img class="alumni-avatar" src="${foto}" alt="${a.nama_lengkap}" onerror="this.src='${avatarUrl(a.nama_lengkap, 80)}'"/>
                 <div class="alumni-name">${a.nama_lengkap || '—'}</div>
                 <div class="alumni-nis">${a.nis || '—'}</div>
@@ -1519,7 +1365,7 @@ function renderAlumni() {
 }
 
 // ============================================================
-// 10. FILTER ALUMNI
+// 11. FILTER ALUMNI
 // ============================================================
 function filterAlumni() {
     const kw = document.getElementById('searchAlumni').value.toLowerCase().trim();
@@ -1533,7 +1379,7 @@ function filterAlumni() {
 }
 
 // ============================================================
-// 11. RENDER ALBUM
+// 12. RENDER ALBUM
 // ============================================================
 function renderAlbum() {
     const container = document.getElementById('albumContainer');
@@ -1563,7 +1409,7 @@ function renderAlbum() {
 }
 
 // ============================================================
-// 12. RENDER STRUKTUR
+// 13. RENDER STRUKTUR
 // ============================================================
 function renderStruktur() {
     const container = document.getElementById('strukturContainer');
@@ -1572,7 +1418,6 @@ function renderStruktur() {
         return;
     }
 
-    // Group by kelas
     const grouped = {};
     allStruktur.forEach(s => {
         if (!grouped[s.kelas_id]) grouped[s.kelas_id] = [];
@@ -1591,9 +1436,7 @@ function renderStruktur() {
                 <div class="struktur-grid">
                     ${items.map(s => `
                         <div class="struktur-card">
-                            <div class="struktur-icon" style="background:#EEF2FF;color:var(--accent)">
-                                <i class="fas fa-user-tie"></i>
-                            </div>
+                            <div class="struktur-icon"><i class="fas fa-user-tie"></i></div>
                             <div class="struktur-jabatan">${s.jabatan || '—'}</div>
                             <div class="struktur-nama">${s.nama || '—'}</div>
                             ${s.wakil ? `<div class="struktur-wakil"><i class="fas fa-arrow-right" style="font-size:9px"></i> Wakil: ${s.wakil}</div>` : ''}
@@ -1608,7 +1451,7 @@ function renderStruktur() {
 }
 
 // ============================================================
-// 13. RENDER PENGUMUMAN
+// 14. RENDER PENGUMUMAN
 // ============================================================
 function renderPengumuman() {
     const container = document.getElementById('pengumumanContainer');
@@ -1634,7 +1477,7 @@ function renderPengumuman() {
 }
 
 // ============================================================
-// 14. LIGHTBOX
+// 15. LIGHTBOX
 // ============================================================
 function openAlbumLb(index) {
     lbList = allAlbum;
@@ -1685,7 +1528,6 @@ function lbClickOut(e) {
     if (e.target === document.getElementById('lightbox')) closeLb();
 }
 
-// Keyboard navigation
 document.addEventListener('keydown', (e) => {
     if (!document.getElementById('lightbox').classList.contains('open')) return;
     if (e.key === 'Escape') closeLb();
@@ -1694,7 +1536,7 @@ document.addEventListener('keydown', (e) => {
 });
 
 // ============================================================
-// 15. SMOOTH SCROLL
+// 16. SMOOTH SCROLL
 // ============================================================
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function(e) {
@@ -1708,11 +1550,11 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 });
 
 // ============================================================
-// 16. INIT
+// 17. INIT
 // ============================================================
 initTheme();
 checkSession();
 fetchAll();
 </script>
 </body>
-  </html>
+   </html>
