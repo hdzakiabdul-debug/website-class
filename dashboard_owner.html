@@ -1,0 +1,2267 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Owner Dashboard - Portal Alumni</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+<style>
+/* ============================================================
+   ROOT VARIABLES
+   ============================================================ */
+:root {
+    --accent: #4F6EF7;
+    --accent-2: #7C3AED;
+    --accent-light: rgba(79,110,247,.1);
+    --accent-hover: #3B5BDB;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --shadow-xs: 0 1px 3px rgba(0,0,0,.06);
+    --shadow-sm: 0 2px 8px rgba(0,0,0,.08);
+    --shadow-md: 0 8px 24px rgba(0,0,0,.1);
+    --shadow-lg: 0 16px 48px rgba(0,0,0,.15);
+    --tr: .18s ease;
+    --sidebar-width: 270px;
+}
+
+[data-theme="light"] {
+    --bg: #F4F6FB;
+    --bg2: #EBEDF5;
+    --surface: #FFFFFF;
+    --surface2: #F8F9FC;
+    --border: #E4E8F0;
+    --text: #111827;
+    --text2: #4B5563;
+    --text3: #9CA3AF;
+    --nav-bg: rgba(255,255,255,.92);
+    --sidebar-bg: #FFFFFF;
+}
+
+[data-theme="dark"] {
+    --bg: #0F1117;
+    --bg2: #1A1D27;
+    --surface: #1E2130;
+    --surface2: #252838;
+    --border: #2E3248;
+    --text: #F1F3F9;
+    --text2: #A0A8C0;
+    --text3: #6B7399;
+    --nav-bg: rgba(30,33,48,.94);
+    --sidebar-bg: #181B26;
+}
+
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    transition: background var(--tr), color var(--tr);
+    display: flex;
+}
+a { text-decoration: none; color: inherit; }
+img { display: block; max-width: 100%; }
+button { font-family: inherit; cursor: pointer; }
+ul { list-style: none; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--bg2); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+/* ============================================================
+   SIDEBAR
+   ============================================================ */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: var(--sidebar-width);
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border);
+    z-index: 100;
+    overflow-y: auto;
+    transition: transform .3s ease;
+    padding: 20px 0;
+}
+.sidebar-brand {
+    padding: 0 20px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.sidebar-brand .brand-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+.sidebar-brand .brand-name {
+    font-weight: 800;
+    font-size: 16px;
+    color: var(--text);
+}
+.sidebar-brand .brand-name span { color: var(--accent); }
+.sidebar-brand .brand-sub {
+    font-size: 10px;
+    color: var(--text3);
+    font-weight: 500;
+    letter-spacing: .04em;
+}
+
+.sidebar-menu { padding: 0 12px; }
+.sidebar-menu .menu-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    padding: 0 10px 8px;
+}
+.sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--text2);
+    transition: all var(--tr);
+    cursor: pointer;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-family: inherit;
+}
+.sidebar-item:hover { background: var(--accent-light); color: var(--accent); }
+.sidebar-item.active { background: var(--accent-light); color: var(--accent); font-weight: 600; }
+.sidebar-item i { width: 20px; text-align: center; font-size: 14px; flex-shrink: 0; }
+.sidebar-item .badge {
+    margin-left: auto;
+    background: var(--accent);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 99px;
+}
+
+.sidebar-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 12px 14px;
+}
+
+/* ============================================================
+   MAIN CONTENT
+   ============================================================ */
+.main-content {
+    margin-left: var(--sidebar-width);
+    flex: 1;
+    min-height: 100vh;
+}
+
+/* Topbar */
+.topbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    backdrop-filter: blur(20px);
+    background: rgba(255,255,255,.92);
+}
+[data-theme="dark"] .topbar { background: rgba(30,33,48,.94); }
+.topbar-left { display: flex; align-items: center; gap: 14px; }
+.topbar-hamburger {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: var(--text2);
+    padding: 4px;
+}
+.topbar-title { font-size: 18px; font-weight: 800; color: var(--text); }
+.topbar-title span { color: var(--accent); }
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+.topbar-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 14px 6px 10px;
+    border-radius: 99px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+}
+.topbar-user img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+.topbar-user .name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+}
+.topbar-user .role {
+    font-size: 10px;
+    color: var(--text3);
+    font-weight: 500;
+}
+.theme-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text2);
+    font-size: 14px;
+    transition: all var(--tr);
+}
+.theme-btn:hover { background: var(--accent-light); color: var(--accent); }
+
+/* ============================================================
+   CONTENT AREA
+   ============================================================ */
+.content-area { padding: 24px 28px; }
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px;
+    margin-bottom: 28px;
+}
+.stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    box-shadow: var(--shadow-xs);
+    transition: all var(--tr);
+}
+.stat-card:hover { box-shadow: var(--shadow-sm); }
+.stat-card .stat-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    margin-bottom: 12px;
+}
+.stat-card .stat-value {
+    font-size: 26px;
+    font-weight: 900;
+    color: var(--text);
+    line-height: 1;
+}
+.stat-card .stat-label {
+    font-size: 12.5px;
+    color: var(--text3);
+    font-weight: 500;
+    margin-top: 4px;
+}
+.si-blue { background: #EEF2FF; color: var(--accent); }
+.si-green { background: #ECFDF5; color: #059669; }
+.si-orange { background: #FFF7ED; color: #EA580C; }
+.si-purple { background: #F5F3FF; color: #7C3AED; }
+.si-red { background: #FEF2F2; color: #DC2626; }
+.si-cyan { background: #ECFEFF; color: #0891B2; }
+[data-theme="dark"] .si-blue { background: #1e2547; color: #7b9bff; }
+[data-theme="dark"] .si-green { background: #062d1c; color: #34d399; }
+[data-theme="dark"] .si-orange { background: #2d1a06; color: #fb923c; }
+[data-theme="dark"] .si-purple { background: #1e1330; color: #a78bfa; }
+[data-theme="dark"] .si-red { background: #3b0a0a; color: #f87171; }
+[data-theme="dark"] .si-cyan { background: #083b40; color: #67e8f9; }
+
+/* Section */
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+.section-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text);
+}
+.section-title i { color: var(--accent); margin-right: 8px; }
+.section-sub {
+    font-size: 13px;
+    color: var(--text3);
+    font-weight: 400;
+    margin-top: 2px;
+}
+
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 18px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all var(--tr);
+    font-family: inherit;
+}
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(79,110,247,.35); }
+.btn-success { background: #059669; color: #fff; }
+.btn-success:hover { background: #047857; transform: translateY(-1px); }
+.btn-danger { background: #DC2626; color: #fff; }
+.btn-danger:hover { background: #B91C1C; transform: translateY(-1px); }
+.btn-warning { background: #D97706; color: #fff; }
+.btn-warning:hover { background: #B45309; transform: translateY(-1px); }
+.btn-outline { background: transparent; color: var(--accent); border: 1.5px solid var(--accent); }
+.btn-outline:hover { background: var(--accent-light); }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+.btn-xs { padding: 4px 10px; font-size: 11px; }
+
+/* Table Wrapper */
+.table-wrapper {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow-x: auto;
+    box-shadow: var(--shadow-xs);
+}
+.table-wrapper table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+}
+.table-wrapper th {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--text3);
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+}
+.table-wrapper td {
+    padding: 12px 16px;
+    font-size: 13.5px;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+}
+.table-wrapper tr:hover td { background: var(--bg2); }
+.table-wrapper .status-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 600;
+}
+.status-active { background: #D1FAE5; color: #065F46; }
+.status-inactive { background: #FEE2E2; color: #991B1B; }
+.status-pending { background: #FEF3C7; color: #92400E; }
+[data-theme="dark"] .status-active { background: #064E3B; color: #6EE7B7; }
+[data-theme="dark"] .status-inactive { background: #7F1D1D; color: #FCA5A5; }
+[data-theme="dark"] .status-pending { background: #78350F; color: #FCD34D; }
+
+/* Role Badge */
+.role-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 600;
+}
+.role-owner { background: #FEF3C7; color: #92400E; }
+.role-admin { background: #DBEAFE; color: #1E40AF; }
+.role-moderator { background: #EDE9FE; color: #4C1D95; }
+.role-alumni { background: #D1FAE5; color: #065F46; }
+[data-theme="dark"] .role-owner { background: #78350F; color: #FCD34D; }
+[data-theme="dark"] .role-admin { background: #1E3A5F; color: #93C5FD; }
+[data-theme="dark"] .role-moderator { background: #2D1B69; color: #C4B5FD; }
+[data-theme="dark"] .role-alumni { background: #064E3B; color: #6EE7B7; }
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.5);
+    backdrop-filter: blur(6px);
+    z-index: 500;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+.modal-overlay.active { display: flex; }
+.modal-box {
+    background: var(--surface);
+    border-radius: var(--radius);
+    max-width: 560px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 32px;
+    box-shadow: var(--shadow-lg);
+    animation: modalIn .25s ease;
+}
+@keyframes modalIn {
+    from { opacity: 0; transform: scale(.96) translateY(12px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+.modal-header h3 {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text);
+}
+.modal-close {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text2);
+    font-size: 14px;
+    transition: all var(--tr);
+}
+.modal-close:hover { background: #FEE2E2; color: #DC2626; }
+.form-group { margin-bottom: 16px; }
+.form-label {
+    display: block;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text);
+    margin-bottom: 4px;
+}
+.form-label .required { color: #DC2626; }
+.form-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-size: 14px;
+    font-family: inherit;
+    background: var(--surface);
+    color: var(--text);
+    transition: all var(--tr);
+}
+.form-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(79,110,247,.12);
+}
+.form-input.error { border-color: #DC2626; }
+.form-select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-size: 14px;
+    font-family: inherit;
+    background: var(--surface);
+    color: var(--text);
+    transition: all var(--tr);
+    appearance: none;
+    cursor: pointer;
+}
+.form-select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(79,110,247,.12);
+}
+.form-hint {
+    font-size: 12px;
+    color: var(--text3);
+    margin-top: 4px;
+}
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+.form-actions .btn { flex: 1; justify-content: center; }
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+.empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1.5px dashed var(--border);
+}
+.empty-state i { font-size: 40px; color: var(--text3); margin-bottom: 12px; display: block; }
+.empty-state h4 { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.empty-state p { font-size: 13px; color: var(--text3); }
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.toast {
+    padding: 14px 20px;
+    border-radius: var(--radius-sm);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: var(--shadow-md);
+    animation: slideIn .3s ease;
+    min-width: 280px;
+    max-width: 400px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.toast-success { background: #059669; }
+.toast-error { background: #DC2626; }
+.toast-warning { background: #D97706; }
+.toast-info { background: var(--accent); }
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(40px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+.toast .toast-close {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: rgba(255,255,255,.7);
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0 4px;
+}
+.toast .toast-close:hover { color: #fff; }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+    .sidebar.open {
+        transform: translateX(0);
+    }
+    .main-content { margin-left: 0; }
+    .topbar-hamburger { display: block; }
+    .topbar { padding: 10px 16px; }
+    .content-area { padding: 16px; }
+    .topbar-user .name { display: none; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 480px) {
+    .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .modal-box { padding: 20px; margin: 10px; }
+    .form-actions { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+   SIDEBAR
+   ============================================================ -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+        <div class="brand-icon"><i class="fas fa-crown"></i></div>
+        <div>
+            <div class="brand-name">Portal<span>Alumni</span></div>
+            <div class="brand-sub">Owner Dashboard</div>
+        </div>
+    </div>
+
+    <nav class="sidebar-menu">
+        <div class="menu-label">Main</div>
+        <button class="sidebar-item active" data-section="dashboard" onclick="showSection('dashboard')">
+            <i class="fas fa-chart-pie"></i> Dashboard
+        </button>
+        <button class="sidebar-item" data-section="users" onclick="showSection('users')">
+            <i class="fas fa-users-cog"></i> Manajemen User
+            <span class="badge" id="userCount">0</span>
+        </button>
+        <button class="sidebar-item" data-section="alumni" onclick="showSection('alumni')">
+            <i class="fas fa-user-graduate"></i> Alumni
+            <span class="badge" id="alumniCount">0</span>
+        </button>
+        <button class="sidebar-item" data-section="kelas" onclick="showSection('kelas')">
+            <i class="fas fa-door-open"></i> Kelas
+            <span class="badge" id="kelasCount">0</span>
+        </button>
+
+        <div class="sidebar-divider"></div>
+        <div class="menu-label">Content</div>
+        <button class="sidebar-item" data-section="angkatan" onclick="showSection('angkatan')">
+            <i class="fas fa-layer-group"></i> Angkatan
+        </button>
+        <button class="sidebar-item" data-section="struktur" onclick="showSection('struktur')">
+            <i class="fas fa-sitemap"></i> Struktur Organisasi
+        </button>
+        <button class="sidebar-item" data-section="album" onclick="showSection('album')">
+            <i class="fas fa-images"></i> Album
+            <span class="badge" id="albumCount">0</span>
+        </button>
+        <button class="sidebar-item" data-section="media" onclick="showSection('media')">
+            <i class="fas fa-photo-video"></i> Media
+        </button>
+        <button class="sidebar-item" data-section="pengumuman" onclick="showSection('pengumuman')">
+            <i class="fas fa-bullhorn"></i> Pengumuman
+        </button>
+
+        <div class="sidebar-divider"></div>
+        <div class="menu-label">Settings</div>
+        <button class="sidebar-item" data-section="siteconfig" onclick="showSection('siteconfig')">
+            <i class="fas fa-cog"></i> Site Configuration
+        </button>
+        <button class="sidebar-item" data-section="logs" onclick="showSection('logs')">
+            <i class="fas fa-history"></i> Activity Log
+        </button>
+
+        <div class="sidebar-divider"></div>
+        <a href="index.html" class="sidebar-item">
+            <i class="fas fa-globe"></i> Lihat Website
+        </a>
+        <button class="sidebar-item" onclick="logout()" style="color:#DC2626">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+    </nav>
+</aside>
+
+<!-- ============================================================
+   MAIN CONTENT
+   ============================================================ -->
+<main class="main-content">
+
+    <!-- Topbar -->
+    <header class="topbar">
+        <div class="topbar-left">
+            <button class="topbar-hamburger" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="topbar-title" id="pageTitle">Dashboard</div>
+        </div>
+        <div class="topbar-right">
+            <button class="theme-btn" onclick="toggleTheme()">
+                <i id="themeIcon" class="fas fa-moon"></i>
+            </button>
+            <div class="topbar-user">
+                <img id="userAvatar" src="https://ui-avatars.com/api/?name=Owner&background=4F6EF7&color=fff&size=30" alt="User"/>
+                <div>
+                    <div class="name" id="userName">Owner</div>
+                    <div class="role" id="userRole">Owner</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Content -->
+    <div class="content-area">
+
+        <!-- ============================================================
+        SECTION: DASHBOARD
+        ============================================================ -->
+        <div id="section-dashboard">
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <div class="stat-icon si-blue"><i class="fas fa-users"></i></div>
+                    <div class="stat-value" id="statUsers">0</div>
+                    <div class="stat-label">Total User</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon si-green"><i class="fas fa-user-graduate"></i></div>
+                    <div class="stat-value" id="statAlumni">0</div>
+                    <div class="stat-label">Total Alumni</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon si-orange"><i class="fas fa-door-open"></i></div>
+                    <div class="stat-value" id="statKelas">0</div>
+                    <div class="stat-label">Total Kelas</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon si-purple"><i class="fas fa-images"></i></div>
+                    <div class="stat-value" id="statAlbum">0</div>
+                    <div class="stat-label">Total Album</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon si-red"><i class="fas fa-bullhorn"></i></div>
+                    <div class="stat-value" id="statPengumuman">0</div>
+                    <div class="stat-label">Pengumuman</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon si-cyan"><i class="fas fa-layer-group"></i></div>
+                    <div class="stat-value" id="statAngkatan">0</div>
+                    <div class="stat-label">Angkatan</div>
+                </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
+                <div class="stat-card" style="padding:16px 20px">
+                    <div style="display:flex;justify-content:space-between;align-items:center">
+                        <div>
+                            <div class="stat-label">User Aktif</div>
+                            <div class="stat-value" id="statActiveUsers" style="font-size:20px">0</div>
+                        </div>
+                        <div style="font-size:28px;color:var(--accent)"><i class="fas fa-user-check"></i></div>
+                    </div>
+                </div>
+                <div class="stat-card" style="padding:16px 20px">
+                    <div style="display:flex;justify-content:space-between;align-items:center">
+                        <div>
+                            <div class="stat-label">Total Media</div>
+                            <div class="stat-value" id="statMedia" style="font-size:20px">0</div>
+                        </div>
+                        <div style="font-size:28px;color:var(--accent-2)"><i class="fas fa-photo-video"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top:24px">
+                <div class="section-header">
+                    <div>
+                        <div class="section-title"><i class="fas fa-clock"></i> Aktivitas Terbaru</div>
+                        <div class="section-sub">Log aktivitas sistem</div>
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead><tr><th>Waktu</th><th>User</th><th>Aksi</th><th>Target</th></tr></thead>
+                        <tbody id="activityLogTable">
+                            <tr><td colspan="4" style="text-align:center;color:var(--text3);padding:24px">Belum ada aktivitas</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================
+        SECTION: MANAJEMEN USER
+        ============================================================ -->
+        <div id="section-users" style="display:none">
+            <div class="section-header">
+                <div>
+                    <div class="section-title"><i class="fas fa-users-cog"></i> Manajemen User</div>
+                    <div class="section-sub">Kelola semua user dan role</div>
+                </div>
+                <button class="btn btn-primary" onclick="openModal('user')">
+                    <i class="fas fa-user-plus"></i> Tambah User
+                </button>
+            </div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Nama</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Terakhir Login</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody">
+                        <tr><td colspan="7" style="text-align:center;color:var(--text3);padding:32px">Memuat data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ============================================================
+        SECTION: ALUMNI
+        ============================================================ -->
+        <div id="section-alumni" style="display:none">
+            <div class="section-header">
+                <div>
+                    <div class="section-title"><i class="fas fa-user-graduate"></i> Manajemen Alumni</div>
+                    <div class="section-sub">Kelola data alumni</div>
+                </div>
+                <button class="btn btn-primary" onclick="openModal('alumni')">
+                    <i class="fas fa-user-plus"></i> Tambah Alumni
+                </button>
+            </div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>NIS</th>
+                            <th>Nama</th>
+                            <th>Kelas</th>
+                            <th>Angkatan</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="alumniTableBody">
+                        <tr><td colspan="6" style="text-align:center;color:var(--text3);padding:32px">Memuat data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ============================================================
+        SECTION: KELAS
+        ============================================================ -->
+        <div id="section-kelas" style="display:none">
+            <div class="section-header">
+                <div>
+                    <div class="section-title"><i class="fas fa-door-open"></i> Manajemen Kelas</div>
+                    <div class="section-sub">Kelola data kelas</div>
+                </div>
+                <button class="btn btn-primary" onclick="openModal('kelas')">
+                    <i class="fas fa-plus"></i> Tambah Kelas
+                </button>
+            </div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nama Kelas</th>
+                            <th>Angkatan</th>
+                            <th>Tahun Ajaran</th>
+                            <th>Wali Kelas</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="kelasTableBody">
+                        <tr><td colspan="6" style="text-align:center;color:var(--text3);padding:32px">Memuat data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ============================================================
+        SECTION: ANGKATAN
+        ============================================================ -->
+        <div id="section-angkatan" style="display:none">
+            <div class="section-header">
+                <div>
+                    <div class="section-title"><i class="fas fa-layer-group"></i> Manajemen Angkatan</div>
+                    <div class="section-sub">Kelola data angkatan</div>
+                </div>
+                <button class="btn btn-primary" onclick="openModal('angkatan')">
+                    <i class="fas fa-plus"></i> Tambah Angkatan
+                </button>
+            </div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nama</th>
+                            <th>Tahun</th>
+                            <th>Deskripsi</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="angkatanTableBody">
+                        <tr><td colspan="5" style="text-align:center;color:var(--text3);padding:32px">Memuat data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ============================================================
+        SECTION: STRUKTUR
+        ============================================================ -->
+        <div id="section-struktur" style="display:none">
+            <div class="section-header">
+                <div>
+                    <div class="section-title"><i class="fas fa-sitemap"></i> Struktur Organisasi</div>
+                    <div class="section-sub">Kelola struktur organisasi kelas</div>
+                </div>
+                <button class="btn btn-primary" onclick="openModal('struktur')">
+                    <i class="fas fa-plus"></i> Tambah Struktur
+                </button>
+            </div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Kelas</th>
+                            <th>Jabatan</th>
+                            <th>Nama</th>
+                            <th>Wakil</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="strukturTableBody">
+                        <tr><td colspan="5" style="text-align:center;color:var(--text3);padding:32px">Memuat data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ============================================================
+        SECTION: ALBUM
+        ============================================================ -->
+        <div id="section-album" style="display:none">
+            <div class="section-header">
+                <div>
+                    <div class="section-title"><i class="fas fa-images"></i> Manajemen Album</div>
+                    <div class="section-sub">Kelola album kenangan</div>
+                </div>
+                <button class="btn btn-primary" onclick="openModal('album')">
+                    <i class="fas fa-plus"></i> Tambah Album
+                </button>
+            </div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Judul</th>
+                            <th>Kelas</th>
+                            <th>Tahun</th>
+                            <th>Status</th>
+                            <th>Media</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="albumTableBody">
+                        <tr><td colspan="6" style="text-align:center;color:var(--text3);padding:32px">Memuat data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ============================================================
+        SECTION: MEDIA
+        ============================================================ -->
+        <div id="section-media" style="display:none">
+            <div class="section-header">
+                <div>
+                    <div class="section-title"><i class="fas fa-photo-video"></i> Manajemen Media</div>
+                    <div class="section-sub">Kelola media dalam album</div>
+                </div>
+            </div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Preview</th>
+                            <th>Judul</th>
+                            <th>Album</th>
+                            <th>Tipe</th>
+                            <th>Upload</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="mediaTableBody">
+                        <tr><td colspan="6" style="text-align:center;color:var(--text3);padding:32px">Memuat data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ============================================================
+        SECTION: PENGUMUMAN
+        ============================================================ -->
+        <div id="section-pengumuman" style="display:none">
+            <div class="section-header">
+                <div>
+                    <div class="section-title"><i class="fas fa-bullhorn"></i> Manajemen Pengumuman</div>
+                    <div class="section-sub">Kelola pengumuman</div>
+                </div>
+                <button class="btn btn-primary" onclick="openModal('pengumuman')">
+                    <i class="fas fa-plus"></i> Tambah Pengumuman
+                </button>
+            </div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Judul</th>
+                            <th>Status</th>
+                            <th>Target Role</th>
+                            <th>Dibuat</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pengumumanTableBody">
+                        <tr><td colspan="5" style="text-align:center;color:var(--text3);padding:32px">Memuat data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ============================================================
+        SECTION: SITE CONFIG
+        ============================================================ -->
+        <div id="section-siteconfig" style="display:none">
+            <div class="section-header">
+                <div>
+                    <div class="section-title"><i class="fas fa-cog"></i> Site Configuration</div>
+                    <div class="section-sub">Kelola konfigurasi website</div>
+                </div>
+                <button class="btn btn-primary" onclick="saveSiteConfig()">
+                    <i class="fas fa-save"></i> Simpan Konfigurasi
+                </button>
+            </div>
+            <div class="table-wrapper" style="padding:24px">
+                <form id="siteConfigForm">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                        <div class="form-group">
+                            <label class="form-label">Nama Website</label>
+                            <input type="text" id="cfg_site_name" class="form-input" placeholder="Portal Alumni"/>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Tagline</label>
+                            <input type="text" id="cfg_site_tagline" class="form-input" placeholder="Menjaga Silaturahmi Alumni"/>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Owner Name</label>
+                            <input type="text" id="cfg_owner_name" class="form-input" placeholder="XREZZKY OFFICIAL"/>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Copyright Text</label>
+                            <input type="text" id="cfg_copyright" class="form-input" placeholder="© 2026 XREZZKY OFFICIAL. All Rights Reserved."/>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Hero Title</label>
+                            <input type="text" id="cfg_hero_title" class="form-input" placeholder="Selamat Datang di Portal Alumni"/>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Hero Description</label>
+                            <input type="text" id="cfg_hero_desc" class="form-input" placeholder="Menjaga silaturahmi dan kebersamaan alumni"/>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Instagram</label>
+                            <input type="text" id="cfg_ig" class="form-input" placeholder="https://instagram.com/..."/>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">YouTube</label>
+                            <input type="text" id="cfg_yt" class="form-input" placeholder="https://youtube.com/..."/>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">TikTok</label>
+                            <input type="text" id="cfg_tt" class="form-input" placeholder="https://tiktok.com/..."/>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">WhatsApp</label>
+                            <input type="text" id="cfg_wa" class="form-input" placeholder="https://wa.me/..."/>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ============================================================
+        SECTION: ACTIVITY LOG
+        ============================================================ -->
+        <div id="section-logs" style="display:none">
+            <div class="section-header">
+                <div>
+                    <div class="section-title"><i class="fas fa-history"></i> Activity Log</div>
+                    <div class="section-sub">Riwayat aktivitas sistem</div>
+                </div>
+                <button class="btn btn-outline btn-sm" onclick="clearLogs()">
+                    <i class="fas fa-trash"></i> Hapus Log
+                </button>
+            </div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Waktu</th>
+                            <th>User</th>
+                            <th>Aksi</th>
+                            <th>Target</th>
+                            <th>IP Address</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logsTableBody">
+                        <tr><td colspan="5" style="text-align:center;color:var(--text3);padding:32px">Memuat data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<!-- ============================================================
+   MODAL
+   ============================================================ -->
+<div class="modal-overlay" id="modal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3 id="modalTitle">Tambah Data</h3>
+            <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <form id="modalForm" onsubmit="saveData(event)">
+            <div id="modalFields"></div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" id="modalSubmit">
+                    <i class="fas fa-save"></i> Simpan
+                </button>
+                <button type="button" class="btn btn-outline" onclick="closeModal()">Batal</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ============================================================
+   TOAST CONTAINER
+   ============================================================ -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ============================================================
+   JAVASCRIPT
+   ============================================================ -->
+<script>
+// ============================================================
+// 1. SUPABASE INIT
+// ============================================================
+const SB_URL = 'https://zcmjheeafmtrzyhyhkcg.supabase.co';
+const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjbWpoZWVhZm10cnp5aHloa2NnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1OTY5MDksImV4cCI6MjA5ODE3MjkwOX0.j60lA9VDiTyp42IN8iDsDGu6Qf5EebgYloocFrZqEn4';
+const sb = window.supabase.createClient(SB_URL, SB_ANON);
+
+// ============================================================
+// 2. STATE
+// ============================================================
+let currentUser = null;
+let allUsers = [];
+let allAlumni = [];
+let allKelas = [];
+let allAngkatan = [];
+let allStruktur = [];
+let allAlbum = [];
+let allMedia = [];
+let allPengumuman = [];
+let allLogs = [];
+let siteConfig = {};
+let modalType = '';
+let editId = null;
+let currentSection = 'dashboard';
+
+// ============================================================
+// 3. THEME
+// ============================================================
+function isDark() {
+    return document.documentElement.getAttribute('data-theme') === 'dark';
+}
+function toggleTheme() {
+    const n = isDark() ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', n);
+    document.getElementById('themeIcon').className = n === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+    localStorage.setItem('pa_theme', n);
+}
+function initTheme() {
+    const s = localStorage.getItem('pa_theme') || 'light';
+    document.documentElement.setAttribute('data-theme', s);
+    document.getElementById('themeIcon').className = s === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+}
+
+// ============================================================
+// 4. SESSION
+// ============================================================
+function checkSession() {
+    try {
+        const session = localStorage.getItem('userSession');
+        if (!session) {
+            window.location.href = 'login.html';
+            return;
+        }
+        currentUser = JSON.parse(session);
+        if (currentUser.role !== 'owner') {
+            window.location.href = 'index.html';
+            return;
+        }
+        document.getElementById('userName').textContent = currentUser.nama || 'Owner';
+        document.getElementById('userRole').textContent = 'Owner';
+        document.getElementById('userAvatar').src =
+            `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.nama || 'Owner')}&background=4F6EF7&color=fff&size=30`;
+    } catch (e) {
+        window.location.href = 'login.html';
+    }
+}
+
+// ============================================================
+// 5. TOAST
+// ============================================================
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    const icons = {
+        success: 'fa-check-circle',
+        error: 'fa-exclamation-circle',
+        warning: 'fa-exclamation-triangle',
+        info: 'fa-info-circle'
+    };
+    toast.innerHTML = `
+        <i class="fas ${icons[type] || 'fa-info-circle'}"></i>
+        <span>${message}</span>
+        <button class="toast-close" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
+    `;
+    container.appendChild(toast);
+    setTimeout(() => {
+        if (toast.parentElement) toast.remove();
+    }, 5000);
+}
+
+// ============================================================
+// 6. SIDEBAR
+// ============================================================
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+}
+
+function showSection(section) {
+    currentSection = section;
+    document.querySelectorAll('[id^="section-"]').forEach(el => el.style.display = 'none');
+    document.getElementById(`section-${section}`).style.display = 'block';
+    document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+    document.querySelector(`.sidebar-item[data-section="${section}"]`)?.classList.add('active');
+
+    const titles = {
+        dashboard: 'Dashboard',
+        users: 'Manajemen User',
+        alumni: 'Manajemen Alumni',
+        kelas: 'Manajemen Kelas',
+        angkatan: 'Manajemen Angkatan',
+        struktur: 'Struktur Organisasi',
+        album: 'Manajemen Album',
+        media: 'Manajemen Media',
+        pengumuman: 'Manajemen Pengumuman',
+        siteconfig: 'Site Configuration',
+        logs: 'Activity Log'
+    };
+    document.getElementById('pageTitle').innerHTML = `<span>${titles[section] || section}</span>`;
+
+    if (section === 'dashboard') renderDashboard();
+    if (section === 'users') renderUsers();
+    if (section === 'alumni') renderAlumni();
+    if (section === 'kelas') renderKelas();
+    if (section === 'angkatan') renderAngkatan();
+    if (section === 'struktur') renderStruktur();
+    if (section === 'album') renderAlbum();
+    if (section === 'media') renderMedia();
+    if (section === 'pengumuman') renderPengumuman();
+    if (section === 'siteconfig') loadSiteConfig();
+    if (section === 'logs') renderLogs();
+
+    if (window.innerWidth <= 768) {
+        document.getElementById('sidebar').classList.remove('open');
+    }
+}
+
+// ============================================================
+// 7. SHA256
+// ============================================================
+async function sha256(message) {
+    const msgBuffer = new TextEncoder().encode(message);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// ============================================================
+// 8. FETCH ALL DATA
+// ============================================================
+async function fetchAllData() {
+    try {
+        const [u, a, k, ang, s, alb, m, p, l, cfg] = await Promise.all([
+            sb.from('pengguna').select('*').order('created_at', { ascending: false }),
+            sb.from('alumni').select('*').order('nama_lengkap'),
+            sb.from('kelas').select('*').order('nama_kelas'),
+            sb.from('angkatan').select('*').order('tahun', { ascending: false }),
+            sb.from('struktur_organisasi').select('*').order('urutan'),
+            sb.from('album').select('*').order('created_at', { ascending: false }),
+            sb.from('media').select('*').order('created_at', { ascending: false }),
+            sb.from('pengumuman').select('*').order('created_at', { ascending: false }),
+            sb.from('activity_log').select('*, pengguna(nama)').order('created_at', { ascending: false }).limit(100),
+            sb.from('site_config').select('*').limit(1).maybeSingle()
+        ]);
+
+        allUsers = u.data || [];
+        allAlumni = a.data || [];
+        allKelas = k.data || [];
+        allAngkatan = ang.data || [];
+        allStruktur = s.data || [];
+        allAlbum = alb.data || [];
+        allMedia = m.data || [];
+        allPengumuman = p.data || [];
+        allLogs = l.data || [];
+        siteConfig = cfg.data || {};
+
+        updateBadges();
+        renderDashboard();
+
+    } catch (e) {
+        console.error('Error fetching data:', e);
+        showToast('Gagal memuat data: ' + e.message, 'error');
+    }
+}
+
+// ============================================================
+// 9. UPDATE BADGES
+// ============================================================
+function updateBadges() {
+    document.getElementById('userCount').textContent = allUsers.length;
+    document.getElementById('alumniCount').textContent = allAlumni.length;
+    document.getElementById('kelasCount').textContent = allKelas.length;
+    document.getElementById('albumCount').textContent = allAlbum.length;
+}
+
+// ============================================================
+// 10. RENDER DASHBOARD
+// ============================================================
+function renderDashboard() {
+    document.getElementById('statUsers').textContent = allUsers.length;
+    document.getElementById('statAlumni').textContent = allAlumni.length;
+    document.getElementById('statKelas').textContent = allKelas.length;
+    document.getElementById('statAlbum').textContent = allAlbum.length;
+    document.getElementById('statPengumuman').textContent = allPengumuman.length;
+    document.getElementById('statAngkatan').textContent = allAngkatan.length;
+    document.getElementById('statActiveUsers').textContent = allUsers.filter(u => u.is_active).length;
+    document.getElementById('statMedia').textContent = allMedia.length;
+
+    // Activity Log
+    const tbody = document.getElementById('activityLogTable');
+    if (!allLogs.length) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:24px">Belum ada aktivitas</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = allLogs.slice(0, 10).map(log => `
+        <tr>
+            <td style="font-size:12px;color:var(--text3)">${formatDate(log.created_at)}</td>
+            <td>${log.pengguna?.nama || 'Sistem'}</td>
+            <td>${log.action || '—'}</td>
+            <td style="font-size:13px;color:var(--text2)">${log.target_type || '—'}</td>
+        </tr>
+    `).join('');
+}
+
+// ============================================================
+// 11. UTILITY FUNCTIONS
+// ============================================================
+function formatDate(date) {
+    if (!date) return '—';
+    const d = new Date(date);
+    return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+function getKelasName(id) {
+    const k = allKelas.find(k => k.id === id);
+    return k ? k.nama_kelas : '—';
+}
+
+function getAngkatanName(id) {
+    const a = allAngkatan.find(a => a.id === id);
+    return a ? a.nama : '—';
+}
+
+function getRoleBadge(role) {
+    const map = {
+        'owner': 'role-owner',
+        'admin': 'role-admin',
+        'moderator': 'role-moderator',
+        'alumni': 'role-alumni'
+    };
+    return map[role] || '';
+}
+
+function getRoleLabel(role) {
+    const map = {
+        'owner': 'Owner',
+        'admin': 'Admin',
+        'moderator': 'Moderator',
+        'alumni': 'Alumni',
+        'guest': 'Guest',
+        'banned': 'Banned'
+    };
+    return map[role] || role;
+}
+
+function statusBadge(status) {
+    const map = {
+        'active': 'status-active',
+        'inactive': 'status-inactive',
+        'pending': 'status-pending',
+        'draft': 'status-pending',
+        'published': 'status-active'
+    };
+    return map[status] || 'status-pending';
+}
+
+// ============================================================
+// 12. RENDER USERS
+// ============================================================
+function renderUsers() {
+    const tbody = document.getElementById('userTableBody');
+    if (!allUsers.length) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:32px">Belum ada user</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = allUsers.map(u => `
+        <tr>
+            <td><strong>${u.username}</strong></td>
+            <td>${u.nama || '—'}</td>
+            <td>${u.email || '—'}</td>
+            <td><span class="role-badge ${getRoleBadge(u.role)}">${getRoleLabel(u.role)}</span></td>
+            <td><span class="status-badge ${statusBadge(u.is_active ? 'active' : 'inactive')}">${u.is_active ? 'Aktif' : 'Nonaktif'}</span></td>
+            <td style="font-size:12px;color:var(--text3)">${u.last_login ? formatDate(u.last_login) : '—'}</td>
+            <td>
+                <button class="btn btn-primary btn-xs" onclick="editUser('${u.id}')"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-danger btn-xs" onclick="deleteUser('${u.id}')"><i class="fas fa-trash"></i></button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// ============================================================
+// 13. RENDER ALUMNI
+// ============================================================
+function renderAlumni() {
+    const tbody = document.getElementById('alumniTableBody');
+    if (!allAlumni.length) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:32px">Belum ada alumni</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = allAlumni.map(a => `
+        <tr>
+            <td><strong>${a.nis || '—'}</strong></td>
+            <td>${a.nama_lengkap}</td>
+            <td>${getKelasName(a.kelas_id)}</td>
+            <td>${getAngkatanName(a.angkatan_id)}</td>
+            <td><span class="status-badge ${statusBadge(a.status || 'active')}">${a.status || 'Aktif'}</span></td>
+            <td>
+                <button class="btn btn-primary btn-xs" onclick="editAlumni('${a.id}')"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-danger btn-xs" onclick="deleteAlumni('${a.id}')"><i class="fas fa-trash"></i></button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// ============================================================
+// 14. RENDER KELAS
+// ============================================================
+function renderKelas() {
+    const tbody = document.getElementById('kelasTableBody');
+    if (!allKelas.length) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:32px">Belum ada kelas</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = allKelas.map(k => `
+        <tr>
+            <td><strong>${k.nama_kelas}</strong></td>
+            <td>${getAngkatanName(k.angkatan_id)}</td>
+            <td>${k.tahun_ajaran || '—'}</td>
+            <td>${k.walas || '—'}</td>
+            <td><span class="status-badge ${statusBadge(k.is_active ? 'active' : 'inactive')}">${k.is_active ? 'Aktif' : 'Nonaktif'}</span></td>
+            <td>
+                <button class="btn btn-primary btn-xs" onclick="editKelas('${k.id}')"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-danger btn-xs" onclick="deleteKelas('${k.id}')"><i class="fas fa-trash"></i></button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// ============================================================
+// 15. RENDER ANGKATAN
+// ============================================================
+function renderAngkatan() {
+    const tbody = document.getElementById('angkatanTableBody');
+    if (!allAngkatan.length) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:32px">Belum ada angkatan</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = allAngkatan.map(a => `
+        <tr>
+            <td><strong>${a.nama}</strong></td>
+            <td>${a.tahun || '—'}</td>
+            <td>${a.deskripsi || '—'}</td>
+            <td><span class="status-badge ${statusBadge(a.is_active ? 'active' : 'inactive')}">${a.is_active ? 'Aktif' : 'Nonaktif'}</span></td>
+            <td>
+                <button class="btn btn-primary btn-xs" onclick="editAngkatan('${a.id}')"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-danger btn-xs" onclick="deleteAngkatan('${a.id}')"><i class="fas fa-trash"></i></button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// ============================================================
+// 16. RENDER STRUKTUR
+// ============================================================
+function renderStruktur() {
+    const tbody = document.getElementById('strukturTableBody');
+    if (!allStruktur.length) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:32px">Belum ada struktur</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = allStruktur.map(s => `
+        <tr>
+            <td>${getKelasName(s.kelas_id)}</td>
+            <td><strong>${s.jabatan}</strong></td>
+            <td>${s.nama || '—'}</td>
+            <td>${s.wakil || '—'}</td>
+            <td>
+                <button class="btn btn-primary btn-xs" onclick="editStruktur('${s.id}')"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-danger btn-xs" onclick="deleteStruktur('${s.id}')"><i class="fas fa-trash"></i></button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// ============================================================
+// 17. RENDER ALBUM
+// ============================================================
+function renderAlbum() {
+    const tbody = document.getElementById('albumTableBody');
+    if (!allAlbum.length) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:32px">Belum ada album</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = allAlbum.map(a => {
+        const mediaCount = allMedia.filter(m => m.album_id === a.id).length;
+        return `
+            <tr>
+                <td><strong>${a.judul}</strong></td>
+                <td>${getKelasName(a.kelas_id)}</td>
+                <td>${a.tahun || '—'}</td>
+                <td><span class="status-badge ${statusBadge(a.status || 'published')}">${a.status || 'Published'}</span></td>
+                <td>${mediaCount} media</td>
+                <td>
+                    <button class="btn btn-primary btn-xs" onclick="editAlbum('${a.id}')"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-danger btn-xs" onclick="deleteAlbum('${a.id}')"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+// ============================================================
+// 18. RENDER MEDIA
+// ============================================================
+function renderMedia() {
+    const tbody = document.getElementById('mediaTableBody');
+    if (!allMedia.length) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:32px">Belum ada media</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = allMedia.map(m => `
+        <tr>
+            <td>
+                ${m.tipe === 'video' ?
+                    `<i class="fas fa-play-circle" style="font-size:24px;color:var(--accent)"></i>` :
+                    `<img src="${m.thumbnail || m.url}" style="width:50px;height:50px;object-fit:cover;border-radius:8px" onerror="this.src='https://placehold.co/50x50/EEF2FF/4F6EF7?text=No'"/>`
+                }
+            </td>
+            <td><strong>${m.judul || '—'}</strong></td>
+            <td>${getAlbumName(m.album_id)}</td>
+            <td><span class="status-badge ${m.tipe === 'video' ? 'status-pending' : 'status-active'}">${m.tipe || 'foto'}</span></td>
+            <td style="font-size:12px;color:var(--text3)">${formatDate(m.created_at)}</td>
+            <td>
+                <button class="btn btn-primary btn-xs" onclick="editMedia('${m.id}')"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-danger btn-xs" onclick="deleteMedia('${m.id}')"><i class="fas fa-trash"></i></button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function getAlbumName(id) {
+    const a = allAlbum.find(a => a.id === id);
+    return a ? a.judul : '—';
+}
+
+// ============================================================
+// 19. RENDER PENGUMUMAN
+// ============================================================
+function renderPengumuman() {
+    const tbody = document.getElementById('pengumumanTableBody');
+    if (!allPengumuman.length) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:32px">Belum ada pengumuman</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = allPengumuman.map(p => `
+        <tr>
+            <td><strong>${p.judul}</strong></td>
+            <td><span class="status-badge ${statusBadge(p.status || 'draft')}">${p.status || 'Draft'}</span></td>
+            <td>${p.target_role ? getRoleLabel(p.target_role) : 'Semua'}</td>
+            <td style="font-size:12px;color:var(--text3)">${formatDate(p.created_at)}</td>
+            <td>
+                <button class="btn btn-primary btn-xs" onclick="editPengumuman('${p.id}')"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-danger btn-xs" onclick="deletePengumuman('${p.id}')"><i class="fas fa-trash"></i></button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// ============================================================
+// 20. RENDER LOGS
+// ============================================================
+function renderLogs() {
+    const tbody = document.getElementById('logsTableBody');
+    if (!allLogs.length) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:32px">Belum ada log</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = allLogs.map(log => `
+        <tr>
+            <td style="font-size:12px;color:var(--text3)">${formatDate(log.created_at)}</td>
+            <td>${log.pengguna?.nama || 'Sistem'}</td>
+            <td>${log.action || '—'}</td>
+            <td style="font-size:13px;color:var(--text2)">${log.target_type || '—'}</td>
+            <td style="font-size:12px;color:var(--text3)">${log.ip_address || '—'}</td>
+        </tr>
+    `).join('');
+}
+
+// ============================================================
+// 21. SITE CONFIG
+// ============================================================
+function loadSiteConfig() {
+    const c = siteConfig;
+    document.getElementById('cfg_site_name').value = c.site_name || '';
+    document.getElementById('cfg_site_tagline').value = c.site_tagline || '';
+    document.getElementById('cfg_owner_name').value = c.owner_name || '';
+    document.getElementById('cfg_copyright').value = c.copyright_text || '';
+    document.getElementById('cfg_hero_title').value = c.hero_title || '';
+    document.getElementById('cfg_hero_desc').value = c.hero_desc || '';
+    document.getElementById('cfg_ig').value = c.social_ig || '';
+    document.getElementById('cfg_yt').value = c.social_yt || '';
+    document.getElementById('cfg_tt').value = c.social_tt || '';
+    document.getElementById('cfg_wa').value = c.social_wa || '';
+}
+
+async function saveSiteConfig() {
+    const data = {
+        site_name: document.getElementById('cfg_site_name').value,
+        site_tagline: document.getElementById('cfg_site_tagline').value,
+        owner_name: document.getElementById('cfg_owner_name').value,
+        copyright_text: document.getElementById('cfg_copyright').value,
+        hero_title: document.getElementById('cfg_hero_title').value,
+        hero_desc: document.getElementById('cfg_hero_desc').value,
+        social_ig: document.getElementById('cfg_ig').value,
+        social_yt: document.getElementById('cfg_yt').value,
+        social_tt: document.getElementById('cfg_tt').value,
+        social_wa: document.getElementById('cfg_wa').value
+    };
+
+    try {
+        const { error } = await sb.from('site_config').upsert(data, { onConflict: 'id' });
+        if (error) throw error;
+        showToast('Konfigurasi berhasil disimpan!');
+        await fetchAllData();
+    } catch (e) {
+        showToast('Gagal menyimpan: ' + e.message, 'error');
+    }
+}
+
+// ============================================================
+// 22. MODAL
+// ============================================================
+function openModal(type, id = null) {
+    modalType = type;
+    editId = id;
+
+    const modal = document.getElementById('modal');
+    const title = document.getElementById('modalTitle');
+    const fields = document.getElementById('modalFields');
+
+    let data = null;
+    if (id) {
+        if (type === 'user') data = allUsers.find(d => d.id === id);
+        else if (type === 'alumni') data = allAlumni.find(d => d.id === id);
+        else if (type === 'kelas') data = allKelas.find(d => d.id === id);
+        else if (type === 'angkatan') data = allAngkatan.find(d => d.id === id);
+        else if (type === 'struktur') data = allStruktur.find(d => d.id === id);
+        else if (type === 'album') data = allAlbum.find(d => d.id === id);
+        else if (type === 'media') data = allMedia.find(d => d.id === id);
+        else if (type === 'pengumuman') data = allPengumuman.find(d => d.id === id);
+        title.textContent = `Edit ${type.charAt(0).toUpperCase() + type.slice(1)}`;
+    } else {
+        title.textContent = `Tambah ${type.charAt(0).toUpperCase() + type.slice(1)} Baru`;
+    }
+
+    fields.innerHTML = generateFormFields(type, data);
+    modal.classList.add('active');
+}
+
+function closeModal() {
+    document.getElementById('modal').classList.remove('active');
+    modalType = '';
+    editId = null;
+}
+
+function generateFormFields(type, data = null) {
+    let html = '';
+
+    if (type === 'user') {
+        html = `
+            <div class="form-group">
+                <label class="form-label">Username <span class="required">*</span></label>
+                <input type="text" name="username" class="form-input" value="${data?.username || ''}" required/>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Nama Lengkap <span class="required">*</span></label>
+                <input type="text" name="nama" class="form-input" value="${data?.nama || ''}" required/>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" name="email" class="form-input" value="${data?.email || ''}"/>
+            </div>
+            ${!editId ? `
+            <div class="form-group">
+                <label class="form-label">Password <span class="required">*</span></label>
+                <input type="password" name="password" class="form-input" placeholder="Minimal 6 karakter" required/>
+                <div class="form-hint">Minimal 6 karakter</div>
+            </div>
+            ` : `
+            <div class="form-group">
+                <label class="form-label">Password (Kosongkan jika tidak diubah)</label>
+                <input type="password" name="password" class="form-input" placeholder="Minimal 6 karakter"/>
+            </div>
+            `}
+            <div class="form-group">
+                <label class="form-label">Role <span class="required">*</span></label>
+                <select name="role" class="form-select" required>
+                    <option value="">Pilih Role</option>
+                    <option value="owner" ${data?.role === 'owner' ? 'selected' : ''}>Owner</option>
+                    <option value="admin" ${data?.role === 'admin' ? 'selected' : ''}>Admin</option>
+                    <option value="moderator" ${data?.role === 'moderator' ? 'selected' : ''}>Moderator</option>
+                    <option value="alumni" ${data?.role === 'alumni' ? 'selected' : ''}>Alumni</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Status</label>
+                <select name="is_active" class="form-select">
+                    <option value="true" ${data?.is_active !== false ? 'selected' : ''}>Aktif</option>
+                    <option value="false" ${data?.is_active === false ? 'selected' : ''}>Nonaktif</option>
+                </select>
+            </div>
+            ${data?.kelas_id ? `
+            <div class="form-group">
+                <label class="form-label">Kelas (untuk Admin/Moderator)</label>
+                <select name="kelas_id" class="form-select">
+                    <option value="">Pilih Kelas</option>
+                    ${allKelas.map(k => `
+                        <option value="${k.id}" ${data?.kelas_id === k.id ? 'selected' : ''}>${k.nama_kelas}</option>
+                    `).join('')}
+                </select>
+            </div>
+            ` : ''}
+        `;
+    } else if (type === 'alumni') {
+        html = `
+            <div class="form-group">
+                <label class="form-label">NIS <span class="required">*</span></label>
+                <input type="text" name="nis" class="form-input" value="${data?.nis || ''}" required/>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Nama Lengkap <span class="required">*</span></label>
+                <input type="text" name="nama_lengkap" class="form-input" value="${data?.nama_lengkap || ''}" required/>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Kelas</label>
+                <select name="kelas_id" class="form-select">
+                    <option value="">Pilih Kelas</option>
+                    ${allKelas.map(k => `
+                        <option value="${k.id}" ${data?.kelas_id === k.id ? 'selected' : ''}>${k.nama_kelas}</option>
+                    `).join('')}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Angkatan</label>
+                <select name="angkatan_id" class="form-select">
+                    <option value="">Pilih Angkatan</option>
+                    ${allAngkatan.map(a => `
+                        <option value="${a.id}" ${data?.angkatan_id === a.id ? 'selected' : ''}>${a.nama} (${a.tahun})</option>
+                    `).join('')}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Jenis Kelamin</label>
+                <select name="jenis_kelamin" class="form-select">
+                    <option value="">Pilih</option>
+                    <option value="Laki-laki" ${data?.jenis_kelamin === 'Laki-laki' ? 'selected' : ''}>Laki-laki</option>
+                    <option value="Perempuan" ${data?.jenis_kelamin === 'Perempuan' ? 'selected' : ''}>Perempuan</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Tempat Lahir</label>
+                <input type="text" name="tempat_lahir" class="form-input" value="${data?.tempat_lahir || ''}"/>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Tanggal Lahir</label>
+                <input type="date" name="tanggal_lahir" class="form-input" value="${data?.tanggal_lahir || ''}"/>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Alamat</label>
+                <textarea name="alamat" class="form-input" rows="3">${data?.alamat || ''}</textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">No Telepon</label>
+                <input type="text" name="no_telepon" class="form-input" value="${data?.no_telepon || ''}"/>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" name="email" class="form-input" value="${data?.email || ''}"/>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Bio</label>
+                <textarea name="bio" class="form-input" rows="3">${data?.bio || ''}</textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Pekerjaan</label>
+                <input type="text" name="pekerjaan" class="form-input" value="${data?.pekerjaan || ''}"/>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Foto (URL)</label>
+                <input type="text" name="foto" class="form-input" value="${data?.foto || ''}" placeholder="https://..."/>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-select">
+                    <option value="active" ${data?.status === 'active' ? 'selected' : ''}>Aktif</option>
+                    <option value="inactive" ${data?.status === 'inactive' ? 'selected' : ''}>Nonaktif</option>
+                </select>
+            </div>
+        `;
+    } else if (type === 'kelas') {
+        html = `
+            <div class="form-group">
+                <label class="form-label">Nama Kelas <span class="required">*</span></label>
+                <input type="text" name="nama_kelas" class="form-input" value="${data?.nama_kelas || ''}" required/>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Angkatan</label>
+                <select name="angkatan_id" class="form-select">
+                    <option value="">Pilih Angkatan</option>
+                    ${allAngkatan.map(a => `
+                        <option value="${a.id}" ${data?.angkatan_id === a.id ? 'selected' : ''}>${a.nama} (${a.tahun})</option>
+                    `).join('')}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Tahun Ajaran</label>
+                <input type="text" name="tahun_ajaran" class="form-input" value="${data?.tahun_ajaran || ''}" placeholder="2024/2025"/>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Wali Kelas</label>
+                <input type="text" name="walas" class="form-input" value="${data?.walas || ''}"/>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Foto Wali Kelas (URL)</label>
+                <input type="text" name="foto_walas" class="form-input" value="${data?.foto_walas || ''}" placeholder="https://..."/>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Status</label>
+                <select name="is_active" class="form-select">
+                    <option value="true" ${data?.is_active !== false ? 'selected' : ''}>Aktif</option>
+                    <option value="false" ${data?.is_active === false ? 'selected' : ''}>Nonaktif</option>
+                </select>
+            </div>
+        `;
+    } else if (type === 'angkatan') {
+        html = `
+            <div class="form-group">
+                <label class="form-label">Nama Angkatan <span class="required">*</span></label>
+                <input type="text" name="nama" class="form-input" value="${data?.nama || ''}" required/>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Tahun <span class="required">*</span></label>
+                <input type="text" name="tahun" class="form-input" value="${data?.tahun || ''}" placeholder="2024" required/>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Deskripsi</label>
+                <textarea name="deskripsi" class="form-input" rows="3">${data?.deskripsi || ''}</textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Status</label>
+                <select name="is_active" class="form-select">
+                    <option value="true" ${data?.is_active !== false ? 'selected' : ''}>Aktif</option>
+                    <option value="false" ${data?.is_active === false ? 'selected' : ''}>Nonaktif</option>
+                </select>
+            </div>
+        `;
+    } else if (type === 'struktur') {
+        html = `
+            <div class="form-group">
+                <label class="form-label">Kelas <span class="required">*</span></label>
+                <select name="kelas_id" class="form-select" required>
+                    <option value="">Pilih Kelas</option>
+                    ${allKelas.map(k => `
+                        <option value="${k.id}" ${data?.kelas_id === k.id ? 'selected' : ''}>${k.nama_kelas}</option>
+                    `).join('')}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Jabatan <span class="required">*</span></label>
+                <input type="text" name="jabatan" class="form-input" value="${data?.jabatan || ''}" required/>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Nama <span class="required">*</span></label>
+                <input type="text" name="nama" class="form-input" value="${data?.nama || ''}" required/>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Wakil</label>
+                <input type="text" name="wakil" class="form-input" value="${data?.wakil || ''}"/>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Urutan</label>
+                <input type="number" name="urutan" class="form-input" value="${data?.urutan || 0}"/>
+            </div>
+        `;
+    } else if (type === 'album') {
+        html = `
+            <div class="form-group">
+                <label class="form-label">Judul <span class="required">*</span></label>
+                <input type="text" name="judul" class="form-input" value="${data?.judul || ''}" required/>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Kelas</label>
+                <select name="kelas_id" class="form-select">
+                    <option value="">Pilih Kelas</option>
+                    ${allKelas.map(k => `
+                        <option value="${k.id}" ${data?.kelas_id === k.id ? 'selected' : ''}>${k.nama_kelas}</option>
+                    `).join('')}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Deskripsi</label>
+                <textarea name="deskripsi" class="form-input" rows="3">${data?.deskripsi || ''}</textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Tahun</label>
+                <input type="text" name="tahun" class="form-input" value="${data?.tahun || ''}"/>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Tanggal</label>
+                <input type="date" name="tanggal" class="form-input" value="${data?.tanggal || ''}"/>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Lokasi</label>
+                <input type="text" name="lokasi" class="form-input" value="${data?.lokasi || ''}"/>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Cover (URL)</label>
+                <input type="text" name="cover" class="form-input" value="${data?.cover || ''}" placeholder="https://..."/>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-select">
+                    <option value="published" ${data?.status === 'published' ? 'selected' : ''}>Published</option>
+                    <option value="draft" ${data?.status === 'draft' ? 'selected' : ''}>Draft</option>
+                    <option value="archived" ${data?.status === 'archived' ? 'selected' : ''}>Archived</option>
+                </select>
+            </div>
+        `;
+    } else if (type === 'media') {
+        html = `
+            <div class="form-group">
+                <label class="form-label">Album <span class="required">*</span></label>
+                <select name="album_id" class="form-select" required>
+                    <option value="">Pilih Album</option>
+                    ${allAlbum.map(a => `
+                        <option value="${a.id}" ${data?.album_id === a.id ? 'selected' : ''}>${a.judul}</option>
+                    `).join('')}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Judul <span class="required">*</span></label>
+                <input type="text" name="judul" class="form-input" value="${data?.judul || ''}" required/>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Caption</label>
+                <textarea name="caption" class="form-input" rows="3">${data?.caption || ''}</textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Tipe</label>
+                <select name="tipe" class="form-select">
+                    <option value="foto" ${data?.tipe === 'foto' ? 'selected' : ''}>Foto</option>
+                    <option value="video" ${data?.tipe === 'video' ? 'selected' : ''}>Video</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">URL <span class="required">*</span></label>
+                <input type="text" name="url" class="form-input" value="${data?.url || ''}" required/>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Thumbnail (URL)</label>
+                <input type="text" name="thumbnail" class="form-input" value="${data?.thumbnail || ''}"/>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Urutan</label>
+                <input type="number" name="urutan" class="form-input" value="${data?.urutan || 0}"/>
+            </div>
+        `;
+    } else if (type === 'pengumuman') {
+        html = `
+            <div class="form-group">
+                <label class="form-label">Judul <span class="required">*</span></label>
+                <input type="text" name="judul" class="form-input" value="${data?.judul || ''}" required/>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Konten <span class="required">*</span></label>
+                <textarea name="konten" class="form-input" rows="5" required>${data?.konten || ''}</textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Gambar (URL)</label>
+                <input type="text" name="gambar" class="form-input" value="${data?.gambar || ''}" placeholder="https://..."/>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Target Role</label>
+                <select name="target_role" class="form-select">
+                    <option value="">Semua</option>
+                    <option value="owner" ${data?.target_role === 'owner' ? 'selected' : ''}>Owner</option>
+                    <option value="admin" ${data?.target_role === 'admin' ? 'selected' : ''}>Admin</option>
+                    <option value="moderator" ${data?.target_role === 'moderator' ? 'selected' : ''}>Moderator</option>
+                    <option value="alumni" ${data?.target_role === 'alumni' ? 'selected' : ''}>Alumni</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-select">
+                    <option value="published" ${data?.status === 'published' ? 'selected' : ''}>Published</option>
+                    <option value="draft" ${data?.status === 'draft' ? 'selected' : ''}>Draft</option>
+                </select>
+            </div>
+        `;
+    }
+
+    return html;
+}
+
+// ============================================================
+// 23. SAVE DATA
+// ============================================================
+async function saveData(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    const data = {};
+
+    for (let [key, value] of formData.entries()) {
+        if (key === 'is_active' || key === 'is_cover') {
+            data[key] = value === 'true';
+        } else if (key === 'password' && !value) {
+            continue;
+        } else {
+            data[key] = value;
+        }
+    }
+
+    const submitBtn = document.getElementById('modalSubmit');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+
+    try {
+        // Hash password if present
+        if (data.password) {
+            data.password = await sha256(data.password);
+        }
+
+        let table = '';
+        let result;
+
+        switch (modalType) {
+            case 'user':
+                table = 'pengguna';
+                break;
+            case 'alumni':
+                table = 'alumni';
+                break;
+            case 'kelas':
+                table = 'kelas';
+                break;
+            case 'angkatan':
+                table = 'angkatan';
+                break;
+            case 'struktur':
+                table = 'struktur_organisasi';
+                break;
+            case 'album':
+                table = 'album';
+                break;
+            case 'media':
+                table = 'media';
+                break;
+            case 'pengumuman':
+                table = 'pengumuman';
+                break;
+            default:
+                throw new Error('Unknown type');
+        }
+
+        if (editId) {
+            result = await sb.from(table).update(data).eq('id', editId);
+        } else {
+            result = await sb.from(table).insert([data]);
+        }
+
+        if (result.error) throw result.error;
+
+        // Log activity
+        await sb.from('activity_log').insert([{
+            pengguna_id: currentUser?.id,
+            action: editId ? 'update' : 'insert',
+            target_type: modalType,
+            target_id: editId || result.data?.[0]?.id,
+            data: { table, data },
+            ip_address: '127.0.0.1'
+        }]);
+
+        showToast(`Data ${modalType} berhasil ${editId ? 'diupdate' : 'ditambahkan'}!`);
+        closeModal();
+        await fetchAllData();
+        showSection(currentSection);
+
+    } catch (e) {
+        showToast('Gagal menyimpan: ' + e.message, 'error');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-save"></i> Simpan';
+    }
+}
+
+// ============================================================
+// 24. DELETE FUNCTIONS
+// ============================================================
+async function deleteRecord(table, id, name) {
+    if (!confirm(`Yakin ingin menghapus ${name} ini?`)) return;
+
+    try {
+        const { error } = await sb.from(table).delete().eq('id', id);
+        if (error) throw error;
+
+        await sb.from('activity_log').insert([{
+            pengguna_id: currentUser?.id,
+            action: 'delete',
+            target_type: table,
+            target_id: id,
+            ip_address: '127.0.0.1'
+        }]);
+
+        showToast(`${name} berhasil dihapus!`);
+        await fetchAllData();
+        showSection(currentSection);
+
+    } catch (e) {
+        showToast('Gagal menghapus: ' + e.message, 'error');
+    }
+}
+
+function deleteUser(id) { deleteRecord('pengguna', id, 'User'); }
+function deleteAlumni(id) { deleteRecord('alumni', id, 'Alumni'); }
+function deleteKelas(id) { deleteRecord('kelas', id, 'Kelas'); }
+function deleteAngkatan(id) { deleteRecord('angkatan', id, 'Angkatan'); }
+function deleteStruktur(id) { deleteRecord('struktur_organisasi', id, 'Struktur'); }
+function deleteAlbum(id) { deleteRecord('album', id, 'Album'); }
+function deleteMedia(id) { deleteRecord('media', id, 'Media'); }
+function deletePengumuman(id) { deleteRecord('pengumuman', id, 'Pengumuman'); }
+
+// ============================================================
+// 25. EDIT FUNCTIONS
+// ============================================================
+function editUser(id) { openModal('user', id); }
+function editAlumni(id) { openModal('alumni', id); }
+function editKelas(id) { openModal('kelas', id); }
+function editAngkatan(id) { openModal('angkatan', id); }
+function editStruktur(id) { openModal('struktur', id); }
+function editAlbum(id) { openModal('album', id); }
+function editMedia(id) { openModal('media', id); }
+function editPengumuman(id) { openModal('pengumuman', id); }
+
+// ============================================================
+// 26. CLEAR LOGS
+// ============================================================
+async function clearLogs() {
+    if (!confirm('Yakin ingin menghapus semua log?')) return;
+    try {
+        const { error } = await sb.from('activity_log').delete().neq('id', '');
+        if (error) throw error;
+        showToast('Log berhasil dihapus!');
+        await fetchAllData();
+        showSection('logs');
+    } catch (e) {
+        showToast('Gagal menghapus log: ' + e.message, 'error');
+    }
+}
+
+// ============================================================
+// 27. LOGOUT
+// ============================================================
+function logout() {
+    if (confirm('Yakin ingin logout?')) {
+        localStorage.removeItem('userSession');
+        window.location.href = 'login.html';
+    }
+}
+
+// ============================================================
+// 28. INIT
+// ============================================================
+initTheme();
+checkSession();
+fetchAllData();
+
+// Handle click outside modal
+document.getElementById('modal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeModal();
+});
+
+// Keyboard shortcut
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        if (document.getElementById('modal').classList.contains('active')) {
+            closeModal();
+        }
+    }
+});
+</script>
+</body>
+  </html>
