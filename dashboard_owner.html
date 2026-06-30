@@ -1051,10 +1051,13 @@ ul { list-style: none; }
             </div>
             <div class="table-wrapper" style="padding:24px">
                 <form id="siteConfigForm">
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+
+                    <h3 style="font-size:14px;font-weight:800;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px"><i class="fas fa-id-badge" style="color:var(--accent)"></i> Identitas Website</h3>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px">
                         <div class="form-group">
                             <label class="form-label">Nama Website</label>
                             <input type="text" id="cfg_site_name" class="form-input" placeholder="Portal Alumni"/>
+                            <p class="form-hint">Tampil di navbar, footer, dan judul tab browser</p>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Tagline</label>
@@ -1067,15 +1070,65 @@ ul { list-style: none; }
                         <div class="form-group">
                             <label class="form-label">Copyright Text</label>
                             <input type="text" id="cfg_copyright" class="form-input" placeholder="© 2026 XREZZKY OFFICIAL. All Rights Reserved."/>
+                            <p class="form-hint">Jika dikosongkan, otomatis dibuat dari Owner Name</p>
+                        </div>
+                    </div>
+
+                    <h3 style="font-size:14px;font-weight:800;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px"><i class="fas fa-image" style="color:var(--accent)"></i> Hero Section (Banner Utama)</h3>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px">
+                        <div class="form-group">
+                            <label class="form-label">Hero Chip (label kecil)</label>
+                            <input type="text" id="cfg_hero_chip" class="form-input" placeholder="Portal Alumni"/>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Hero Title</label>
-                            <input type="text" id="cfg_hero_title" class="form-input" placeholder="Selamat Datang di Portal Alumni"/>
+                            <input type="text" id="cfg_hero_title" class="form-input" placeholder="Selamat Datang di\nPortal Alumni"/>
+                            <p class="form-hint">Gunakan \n untuk membuat baris baru</p>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group" style="grid-column:1/-1">
                             <label class="form-label">Hero Description</label>
                             <input type="text" id="cfg_hero_desc" class="form-input" placeholder="Menjaga silaturahmi dan kebersamaan alumni"/>
                         </div>
+                    </div>
+
+                    <h3 style="font-size:14px;font-weight:800;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px"><i class="fas fa-heading" style="color:var(--accent)"></i> Judul & Subjudul Section</h3>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px">
+                        <div class="form-group">
+                            <label class="form-label">Judul Section Alumni</label>
+                            <input type="text" id="cfg_sec_alumni_title" class="form-input" placeholder="Daftar Alumni"/>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Subjudul Section Alumni</label>
+                            <input type="text" id="cfg_sec_alumni_sub" class="form-input" placeholder="Temukan teman-teman alumni"/>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Judul Section Album</label>
+                            <input type="text" id="cfg_sec_album_title" class="form-input" placeholder="Album Kenangan"/>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Subjudul Section Album</label>
+                            <input type="text" id="cfg_sec_album_sub" class="form-input" placeholder="Koleksi foto dan video kenangan"/>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Judul Section Struktur</label>
+                            <input type="text" id="cfg_sec_struktur_title" class="form-input" placeholder="Struktur Organisasi"/>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Subjudul Section Struktur</label>
+                            <input type="text" id="cfg_sec_struktur_sub" class="form-input" placeholder="Susunan pengurus dan struktur kelas"/>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Judul Section Pengumuman</label>
+                            <input type="text" id="cfg_sec_pengumuman_title" class="form-input" placeholder="Pengumuman"/>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Subjudul Section Pengumuman</label>
+                            <input type="text" id="cfg_sec_pengumuman_sub" class="form-input" placeholder="Informasi terbaru untuk alumni"/>
+                        </div>
+                    </div>
+
+                    <h3 style="font-size:14px;font-weight:800;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px"><i class="fas fa-share-nodes" style="color:var(--accent)"></i> Sosial Media</h3>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
                         <div class="form-group">
                             <label class="form-label">Instagram</label>
                             <input type="text" id="cfg_ig" class="form-input" placeholder="https://instagram.com/..."/>
@@ -1091,6 +1144,10 @@ ul { list-style: none; }
                         <div class="form-group">
                             <label class="form-label">WhatsApp</label>
                             <input type="text" id="cfg_wa" class="form-input" placeholder="https://wa.me/..."/>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Facebook</label>
+                            <input type="text" id="cfg_fb" class="form-input" placeholder="https://facebook.com/..."/>
                         </div>
                     </div>
                 </form>
@@ -1669,12 +1726,22 @@ function loadSiteConfig() {
     document.getElementById('cfg_site_tagline').value = c.site_tagline || '';
     document.getElementById('cfg_owner_name').value = c.owner_name || '';
     document.getElementById('cfg_copyright').value = c.copyright_text || '';
+    document.getElementById('cfg_hero_chip').value = c.hero_chip || '';
     document.getElementById('cfg_hero_title').value = c.hero_title || '';
     document.getElementById('cfg_hero_desc').value = c.hero_desc || '';
+    document.getElementById('cfg_sec_alumni_title').value = c.sec_alumni_title || '';
+    document.getElementById('cfg_sec_alumni_sub').value = c.sec_alumni_sub || '';
+    document.getElementById('cfg_sec_album_title').value = c.sec_album_title || '';
+    document.getElementById('cfg_sec_album_sub').value = c.sec_album_sub || '';
+    document.getElementById('cfg_sec_struktur_title').value = c.sec_struktur_title || '';
+    document.getElementById('cfg_sec_struktur_sub').value = c.sec_struktur_sub || '';
+    document.getElementById('cfg_sec_pengumuman_title').value = c.sec_pengumuman_title || '';
+    document.getElementById('cfg_sec_pengumuman_sub').value = c.sec_pengumuman_sub || '';
     document.getElementById('cfg_ig').value = c.social_ig || '';
     document.getElementById('cfg_yt').value = c.social_yt || '';
     document.getElementById('cfg_tt').value = c.social_tt || '';
     document.getElementById('cfg_wa').value = c.social_wa || '';
+    document.getElementById('cfg_fb').value = c.social_fb || '';
 }
 
 async function saveSiteConfig() {
@@ -1683,19 +1750,36 @@ async function saveSiteConfig() {
         site_tagline: document.getElementById('cfg_site_tagline').value,
         owner_name: document.getElementById('cfg_owner_name').value,
         copyright_text: document.getElementById('cfg_copyright').value,
+        hero_chip: document.getElementById('cfg_hero_chip').value,
         hero_title: document.getElementById('cfg_hero_title').value,
         hero_desc: document.getElementById('cfg_hero_desc').value,
+        sec_alumni_title: document.getElementById('cfg_sec_alumni_title').value,
+        sec_alumni_sub: document.getElementById('cfg_sec_alumni_sub').value,
+        sec_album_title: document.getElementById('cfg_sec_album_title').value,
+        sec_album_sub: document.getElementById('cfg_sec_album_sub').value,
+        sec_struktur_title: document.getElementById('cfg_sec_struktur_title').value,
+        sec_struktur_sub: document.getElementById('cfg_sec_struktur_sub').value,
+        sec_pengumuman_title: document.getElementById('cfg_sec_pengumuman_title').value,
+        sec_pengumuman_sub: document.getElementById('cfg_sec_pengumuman_sub').value,
         social_ig: document.getElementById('cfg_ig').value,
         social_yt: document.getElementById('cfg_yt').value,
         social_tt: document.getElementById('cfg_tt').value,
-        social_wa: document.getElementById('cfg_wa').value
+        social_wa: document.getElementById('cfg_wa').value,
+        social_fb: document.getElementById('cfg_fb').value
     };
+
+    // PENTING: sertakan id supaya upsert meng-update baris yang sudah ada,
+    // bukan membuat baris baru setiap kali disimpan.
+    if (siteConfig && siteConfig.id) {
+        data.id = siteConfig.id;
+    }
 
     try {
         const { error } = await sb.from('site_config').upsert(data, { onConflict: 'id' });
         if (error) throw error;
         showToast('Konfigurasi berhasil disimpan!');
         await fetchAllData();
+        loadSiteConfig();
     } catch (e) {
         showToast('Gagal menyimpan: ' + e.message, 'error');
     }
@@ -2264,4 +2348,4 @@ document.addEventListener('keydown', (e) => {
 });
 </script>
 </body>
-  </html>
+                                                        </html>
