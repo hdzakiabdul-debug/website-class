@@ -360,6 +360,60 @@ ul { list-style: none; }
     overflow-x: auto;
     box-shadow: var(--shadow-xs);
 }
+/* HERO SLIDES GRID */
+.hero-slides-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 14px;
+}
+.hero-slide-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-xs);
+    transition: all .2s;
+}
+.hero-slide-card:hover { box-shadow: var(--shadow-md); }
+.hero-slide-thumb {
+    aspect-ratio: 16/9;
+    background: var(--bg2);
+    position: relative;
+    overflow: hidden;
+}
+.hero-slide-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.hero-slide-thumb .no-img {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text3); font-size: 32px;
+}
+.hero-slide-order-badge {
+    position: absolute; top: 8px; left: 8px;
+    background: rgba(0,0,0,.6); color: #fff;
+    font-size: 11px; font-weight: 700;
+    padding: 2px 9px; border-radius: 99px;
+}
+.hero-slide-status {
+    position: absolute; top: 8px; right: 8px;
+    font-size: 10px; font-weight: 700;
+    padding: 2px 9px; border-radius: 99px;
+}
+.hero-slide-status.active { background: #DCFCE7; color: #166534; }
+.hero-slide-status.inactive { background: #F3F4F6; color: #6B7280; }
+.hero-slide-body { padding: 14px 16px; }
+.hero-slide-title { font-size: 13.5px; font-weight: 700; color: var(--text); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hero-slide-desc { font-size: 12px; color: var(--text3); margin-bottom: 12px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.hero-slide-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.hero-slide-actions .btn-icon-sm {
+    width: 28px; height: 28px; border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--border); background: var(--bg2);
+    color: var(--text2); cursor: pointer; font-size: 11px;
+    transition: all .15s;
+}
+.hero-slide-actions .btn-icon-sm:hover { background: var(--accent-light); color: var(--accent); border-color: var(--accent); }
+.hero-slide-actions .btn-icon-sm.danger:hover { background: #FEF2F2; color: #DC2626; border-color: #FCA5A5; }
+.hero-slide-actions .btn-icon-sm:disabled { opacity: .35; cursor: not-allowed; }
 .table-wrapper table {
     width: 100%;
     border-collapse: collapse;
@@ -643,6 +697,10 @@ ul { list-style: none; }
 
         <div class="sidebar-divider"></div>
         <div class="menu-label">Content</div>
+        <button class="sidebar-item" data-section="heroslides" onclick="showSection('heroslides')">
+            <i class="fas fa-images"></i> Hero Carousel
+            <span class="badge" id="heroCount">0</span>
+        </button>
         <button class="sidebar-item" data-section="angkatan" onclick="showSection('angkatan')">
             <i class="fas fa-layer-group"></i> Angkatan
         </button>
@@ -879,6 +937,28 @@ ul { list-style: none; }
                         <tr><td colspan="6" style="text-align:center;color:var(--text3);padding:32px">Memuat data...</td></tr>
                     </tbody>
                 </table>
+            </div>
+        </div>
+
+        <!-- ============================================================
+        SECTION: HERO CAROUSEL
+        ============================================================ -->
+        <div id="section-heroslides" style="display:none">
+            <div class="section-header">
+                <div>
+                    <div class="section-title"><i class="fas fa-images"></i> Hero Carousel</div>
+                    <div class="section-sub">Slide foto banner utama di halaman depan — geser otomatis pelan-pelan</div>
+                </div>
+                <button class="btn btn-primary" onclick="openModal('heroslide')">
+                    <i class="fas fa-plus"></i> Tambah Slide
+                </button>
+            </div>
+            <div class="permission-note" style="background:var(--accent-light);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:12.5px;color:var(--text2)">
+                <i class="fas fa-circle-info" style="color:var(--accent)"></i>
+                Jumlah slide tidak dibatasi. Urutan slide bisa diatur dengan tombol panah. Jika belum ada slide, halaman depan akan menampilkan banner default.
+            </div>
+            <div class="hero-slides-grid" id="heroSlidesGrid">
+                <div style="text-align:center;color:var(--text3);padding:40px;grid-column:1/-1">Memuat data...</div>
             </div>
         </div>
 
@@ -1226,6 +1306,55 @@ const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
 const sb = window.supabase.createClient(SB_URL, SB_ANON);
 
 // ============================================================
+// 1B. CLOUDINARY (untuk upload foto & video langsung)
+// ============================================================
+const CLD_NAME = 'dayfamkrv';
+const CLD_PRESET = 'class2k26.Unsigned';
+
+function uploadToCloudinary(file, onProgress) {
+    return new Promise((resolve, reject) => {
+        const fd = new FormData();
+        fd.append('file', file);
+        fd.append('upload_preset', CLD_PRESET);
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLD_NAME}/auto/upload`);
+        xhr.timeout = 90000;
+        if (onProgress) {
+            xhr.upload.onprogress = (e) => {
+                if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100));
+            };
+        }
+        xhr.onload = () => {
+            if (xhr.status === 200) {
+                try {
+                    const res = JSON.parse(xhr.responseText);
+                    resolve({ url: res.secure_url, resourceType: res.resource_type });
+                } catch (err) { reject(new Error('Gagal membaca respons upload')); }
+            } else {
+                reject(new Error('Upload gagal (HTTP ' + xhr.status + ')'));
+            }
+        };
+        xhr.ontimeout = () => reject(new Error('Upload timeout — coba file yang lebih kecil'));
+        xhr.onerror = () => reject(new Error('Gagal terhubung ke server upload'));
+        xhr.send(fd);
+    });
+}
+
+function previewFileInput(input, previewId) {
+    const el = document.getElementById(previewId);
+    if (!el || !input.files || !input.files[0]) return;
+    const file = input.files[0];
+    const isVideo = file.type.startsWith('video/');
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        el.innerHTML = isVideo
+            ? `<video src="${e.target.result}" controls style="max-width:100%;max-height:180px;border-radius:8px;margin-top:8px"></video>`
+            : `<img src="${e.target.result}" style="max-width:100%;max-height:180px;border-radius:8px;margin-top:8px;object-fit:cover"/>`;
+    };
+    reader.readAsDataURL(file);
+}
+
+// ============================================================
 // 2. STATE
 // ============================================================
 let currentUser = null;
@@ -1239,6 +1368,7 @@ let allMedia = [];
 let allPengumuman = [];
 let allLogs = [];
 let siteConfig = {};
+let allHeroSlides = [];
 let modalType = '';
 let editId = null;
 let currentSection = 'dashboard';
@@ -1328,6 +1458,7 @@ function showSection(section) {
         users: 'Manajemen User',
         alumni: 'Manajemen Alumni',
         kelas: 'Manajemen Kelas',
+        heroslides: 'Hero Carousel',
         angkatan: 'Manajemen Angkatan',
         struktur: 'Struktur Organisasi',
         album: 'Manajemen Album',
@@ -1342,6 +1473,7 @@ function showSection(section) {
     if (section === 'users') renderUsers();
     if (section === 'alumni') renderAlumni();
     if (section === 'kelas') renderKelas();
+    if (section === 'heroslides') renderHeroSlides();
     if (section === 'angkatan') renderAngkatan();
     if (section === 'struktur') renderStruktur();
     if (section === 'album') renderAlbum();
@@ -1370,7 +1502,7 @@ async function sha256(message) {
 // ============================================================
 async function fetchAllData() {
     try {
-        const [u, a, k, ang, s, alb, m, p, l, cfg] = await Promise.all([
+        const [u, a, k, ang, s, alb, m, p, l, cfg, hs] = await Promise.all([
             sb.from('pengguna').select('*').order('created_at', { ascending: false }),
             sb.from('alumni').select('*').order('nama_lengkap'),
             sb.from('kelas').select('*').order('nama_kelas'),
@@ -1380,7 +1512,8 @@ async function fetchAllData() {
             sb.from('media').select('*').order('created_at', { ascending: false }),
             sb.from('pengumuman').select('*').order('created_at', { ascending: false }),
             sb.from('activity_log').select('*, pengguna(nama)').order('created_at', { ascending: false }).limit(100),
-            sb.from('site_config').select('*').limit(1).maybeSingle()
+            sb.from('site_config').select('*').limit(1).maybeSingle(),
+            sb.from('hero_slides').select('*').order('urutan')
         ]);
 
         allUsers = u.data || [];
@@ -1393,6 +1526,7 @@ async function fetchAllData() {
         allPengumuman = p.data || [];
         allLogs = l.data || [];
         siteConfig = cfg.data || {};
+        allHeroSlides = hs.data || [];
 
         updateBadges();
         renderDashboard();
@@ -1411,6 +1545,7 @@ function updateBadges() {
     document.getElementById('alumniCount').textContent = allAlumni.length;
     document.getElementById('kelasCount').textContent = allKelas.length;
     document.getElementById('albumCount').textContent = allAlbum.length;
+    document.getElementById('heroCount').textContent = allHeroSlides.length;
 }
 
 // ============================================================
@@ -1641,6 +1776,75 @@ function renderAlbum() {
 }
 
 // ============================================================
+// 17B. RENDER HERO SLIDES
+// ============================================================
+function renderHeroSlides() {
+    const grid = document.getElementById('heroSlidesGrid');
+    if (!allHeroSlides.length) {
+        grid.innerHTML = `<div style="text-align:center;color:var(--text3);padding:40px;grid-column:1/-1"><i class="fas fa-images" style="font-size:32px;margin-bottom:10px;display:block"></i>Belum ada slide. Tambahkan slide pertama untuk mengaktifkan carousel di halaman depan.</div>`;
+        return;
+    }
+    const sorted = [...allHeroSlides].sort((a, b) => (a.urutan || 0) - (b.urutan || 0));
+    grid.innerHTML = sorted.map((s, i) => `
+        <div class="hero-slide-card">
+            <div class="hero-slide-thumb">
+                ${s.gambar
+                    ? `<img src="${s.gambar}" alt="${s.judul || ''}" onerror="this.src='https://placehold.co/400x225/EEF2FF/4F6EF7?text=Error'"/>`
+                    : `<div class="no-img"><i class="fas fa-image"></i></div>`}
+                <span class="hero-slide-order-badge">#${i + 1}</span>
+                <span class="hero-slide-status ${s.is_active === false ? 'inactive' : 'active'}">${s.is_active === false ? 'Nonaktif' : 'Aktif'}</span>
+            </div>
+            <div class="hero-slide-body">
+                <div class="hero-slide-title">${s.judul || 'Tanpa Judul'}</div>
+                <div class="hero-slide-desc">${s.deskripsi || 'Tidak ada deskripsi'}</div>
+                <div class="hero-slide-actions">
+                    <button class="btn-icon-sm" title="Naikkan urutan" onclick="moveHeroSlide('${s.id}', -1)" ${i === 0 ? 'disabled' : ''}><i class="fas fa-arrow-up"></i></button>
+                    <button class="btn-icon-sm" title="Turunkan urutan" onclick="moveHeroSlide('${s.id}', 1)" ${i === sorted.length - 1 ? 'disabled' : ''}><i class="fas fa-arrow-down"></i></button>
+                    <button class="btn-icon-sm" title="Edit" onclick="openModal('heroslide', '${s.id}')"><i class="fas fa-edit"></i></button>
+                    <button class="btn-icon-sm danger" title="Hapus" onclick="deleteHeroSlide('${s.id}')"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+async function moveHeroSlide(id, direction) {
+    const sorted = [...allHeroSlides].sort((a, b) => (a.urutan || 0) - (b.urutan || 0));
+    const idx = sorted.findIndex(s => s.id === id);
+    const swapIdx = idx + direction;
+    if (swapIdx < 0 || swapIdx >= sorted.length) return;
+
+    const a = sorted[idx];
+    const b = sorted[swapIdx];
+    const urutanA = a.urutan ?? idx;
+    const urutanB = b.urutan ?? swapIdx;
+
+    try {
+        await Promise.all([
+            sb.from('hero_slides').update({ urutan: urutanB }).eq('id', a.id),
+            sb.from('hero_slides').update({ urutan: urutanA }).eq('id', b.id)
+        ]);
+        await fetchAllData();
+        renderHeroSlides();
+    } catch (e) {
+        showToast('Gagal mengubah urutan: ' + e.message, 'error');
+    }
+}
+
+async function deleteHeroSlide(id) {
+    if (!confirm('Hapus slide ini? Tindakan tidak bisa dibatalkan.')) return;
+    try {
+        const { error } = await sb.from('hero_slides').delete().eq('id', id);
+        if (error) throw error;
+        showToast('Slide berhasil dihapus');
+        await fetchAllData();
+        renderHeroSlides();
+    } catch (e) {
+        showToast('Gagal menghapus: ' + e.message, 'error');
+    }
+}
+
+// ============================================================
 // 18. RENDER MEDIA
 // ============================================================
 function renderMedia() {
@@ -1797,6 +2001,11 @@ function openModal(type, id = null) {
     const fields = document.getElementById('modalFields');
 
     let data = null;
+    const typeLabels = {
+        user: 'User', alumni: 'Alumni', kelas: 'Kelas', angkatan: 'Angkatan',
+        struktur: 'Struktur', album: 'Album', media: 'Media', pengumuman: 'Pengumuman',
+        heroslide: 'Slide Hero'
+    };
     if (id) {
         if (type === 'user') data = allUsers.find(d => d.id === id);
         else if (type === 'alumni') data = allAlumni.find(d => d.id === id);
@@ -1806,9 +2015,10 @@ function openModal(type, id = null) {
         else if (type === 'album') data = allAlbum.find(d => d.id === id);
         else if (type === 'media') data = allMedia.find(d => d.id === id);
         else if (type === 'pengumuman') data = allPengumuman.find(d => d.id === id);
-        title.textContent = `Edit ${type.charAt(0).toUpperCase() + type.slice(1)}`;
+        else if (type === 'heroslide') data = allHeroSlides.find(d => d.id === id);
+        title.textContent = `Edit ${typeLabels[type] || type}`;
     } else {
-        title.textContent = `Tambah ${type.charAt(0).toUpperCase() + type.slice(1)} Baru`;
+        title.textContent = `Tambah ${typeLabels[type] || type} Baru`;
     }
 
     fields.innerHTML = generateFormFields(type, data);
@@ -1944,8 +2154,11 @@ function generateFormFields(type, data = null) {
                 <input type="text" name="pekerjaan" class="form-input" value="${data?.pekerjaan || ''}"/>
             </div>
             <div class="form-group">
-                <label class="form-label">Foto (URL)</label>
-                <input type="text" name="foto" class="form-input" value="${data?.foto || ''}" placeholder="https://..."/>
+                <label class="form-label">Foto Profil (Upload)</label>
+                <input type="file" name="foto_file" class="form-input" accept="image/*" onchange="previewFileInput(this,'alumniFotoPreview')"/>
+                <div id="alumniFotoPreview">${data?.foto ? `<img src="${data.foto}" style="max-width:100%;max-height:180px;border-radius:8px;margin-top:8px;object-fit:cover"/>` : ''}</div>
+                <input type="hidden" name="foto" value="${data?.foto || ''}"/>
+                <div class="form-hint">${editId ? 'Kosongkan jika tidak ingin mengganti foto' : 'Opsional'}</div>
             </div>
             <div class="form-group">
                 <label class="form-label">Status</label>
@@ -2072,8 +2285,11 @@ function generateFormFields(type, data = null) {
                 <input type="text" name="lokasi" class="form-input" value="${data?.lokasi || ''}"/>
             </div>
             <div class="form-group">
-                <label class="form-label">Cover (URL)</label>
-                <input type="text" name="cover" class="form-input" value="${data?.cover || ''}" placeholder="https://..."/>
+                <label class="form-label">Cover Album (Upload Foto)</label>
+                <input type="file" name="cover_file" class="form-input" accept="image/*" onchange="previewFileInput(this,'coverPreview')"/>
+                <div id="coverPreview">${data?.cover ? `<img src="${data.cover}" style="max-width:100%;max-height:180px;border-radius:8px;margin-top:8px;object-fit:cover"/>` : ''}</div>
+                <input type="hidden" name="cover" value="${data?.cover || ''}"/>
+                <div class="form-hint">${editId ? 'Kosongkan jika tidak ingin mengganti cover' : 'Opsional — cover juga otomatis terisi dari foto pertama di album'}</div>
             </div>
             <div class="form-group">
                 <label class="form-label">Status</label>
@@ -2096,8 +2312,8 @@ function generateFormFields(type, data = null) {
                 </select>
             </div>
             <div class="form-group">
-                <label class="form-label">Judul <span class="required">*</span></label>
-                <input type="text" name="judul" class="form-input" value="${data?.judul || ''}" required/>
+                <label class="form-label">Judul</label>
+                <input type="text" name="judul" class="form-input" value="${data?.judul || ''}"/>
             </div>
             <div class="form-group">
                 <label class="form-label">Caption</label>
@@ -2105,247 +2321,5 @@ function generateFormFields(type, data = null) {
             </div>
             <div class="form-group">
                 <label class="form-label">Tipe</label>
-                <select name="tipe" class="form-select">
-                    <option value="foto" ${data?.tipe === 'foto' ? 'selected' : ''}>Foto</option>
-                    <option value="video" ${data?.tipe === 'video' ? 'selected' : ''}>Video</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label class="form-label">URL <span class="required">*</span></label>
-                <input type="text" name="url" class="form-input" value="${data?.url || ''}" required/>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Thumbnail (URL)</label>
-                <input type="text" name="thumbnail" class="form-input" value="${data?.thumbnail || ''}"/>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Urutan</label>
-                <input type="number" name="urutan" class="form-input" value="${data?.urutan || 0}"/>
-            </div>
-        `;
-    } else if (type === 'pengumuman') {
-        html = `
-            <div class="form-group">
-                <label class="form-label">Judul <span class="required">*</span></label>
-                <input type="text" name="judul" class="form-input" value="${data?.judul || ''}" required/>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Konten <span class="required">*</span></label>
-                <textarea name="konten" class="form-input" rows="5" required>${data?.konten || ''}</textarea>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Gambar (URL)</label>
-                <input type="text" name="gambar" class="form-input" value="${data?.gambar || ''}" placeholder="https://..."/>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Target Role</label>
-                <select name="target_role" class="form-select">
-                    <option value="">Semua</option>
-                    <option value="owner" ${data?.target_role === 'owner' ? 'selected' : ''}>Owner</option>
-                    <option value="admin" ${data?.target_role === 'admin' ? 'selected' : ''}>Admin</option>
-                    <option value="moderator" ${data?.target_role === 'moderator' ? 'selected' : ''}>Moderator</option>
-                    <option value="alumni" ${data?.target_role === 'alumni' ? 'selected' : ''}>Alumni</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Status</label>
-                <select name="status" class="form-select">
-                    <option value="published" ${data?.status === 'published' ? 'selected' : ''}>Published</option>
-                    <option value="draft" ${data?.status === 'draft' ? 'selected' : ''}>Draft</option>
-                </select>
-            </div>
-        `;
-    }
-
-    return html;
-}
-
-// ============================================================
-// 23. SAVE DATA
-// ============================================================
-async function saveData(e) {
-    e.preventDefault();
-    const form = e.target;
-    const formData = new FormData(form);
-    const data = {};
-
-    for (let [key, value] of formData.entries()) {
-        if (key === 'is_active' || key === 'is_cover') {
-            data[key] = value === 'true';
-        } else if (key === 'password' && !value) {
-            continue;
-        } else {
-            data[key] = value;
-        }
-    }
-
-    const submitBtn = document.getElementById('modalSubmit');
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
-
-    try {
-        // Hash password if present
-        if (data.password) {
-            data.password = await sha256(data.password);
-        }
-
-        let table = '';
-        let result;
-
-        switch (modalType) {
-            case 'user':
-                table = 'pengguna';
-                break;
-            case 'alumni':
-                table = 'alumni';
-                break;
-            case 'kelas':
-                table = 'kelas';
-                break;
-            case 'angkatan':
-                table = 'angkatan';
-                break;
-            case 'struktur':
-                table = 'struktur_organisasi';
-                break;
-            case 'album':
-                table = 'album';
-                break;
-            case 'media':
-                table = 'media';
-                break;
-            case 'pengumuman':
-                table = 'pengumuman';
-                break;
-            default:
-                throw new Error('Unknown type');
-        }
-
-        if (editId) {
-            result = await sb.from(table).update(data).eq('id', editId);
-        } else {
-            result = await sb.from(table).insert([data]);
-        }
-
-        if (result.error) throw result.error;
-
-        // Log activity
-        await sb.from('activity_log').insert([{
-            pengguna_id: currentUser?.id,
-            action: editId ? 'update' : 'insert',
-            target_type: modalType,
-            target_id: editId || result.data?.[0]?.id,
-            data: { table, data },
-            ip_address: '127.0.0.1'
-        }]);
-
-        showToast(`Data ${modalType} berhasil ${editId ? 'diupdate' : 'ditambahkan'}!`);
-        closeModal();
-        await fetchAllData();
-        showSection(currentSection);
-
-    } catch (e) {
-        showToast('Gagal menyimpan: ' + e.message, 'error');
-    } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '<i class="fas fa-save"></i> Simpan';
-    }
-}
-
-// ============================================================
-// 24. DELETE FUNCTIONS
-// ============================================================
-async function deleteRecord(table, id, name) {
-    if (!confirm(`Yakin ingin menghapus ${name} ini?`)) return;
-
-    try {
-        const { error } = await sb.from(table).delete().eq('id', id);
-        if (error) throw error;
-
-        await sb.from('activity_log').insert([{
-            pengguna_id: currentUser?.id,
-            action: 'delete',
-            target_type: table,
-            target_id: id,
-            ip_address: '127.0.0.1'
-        }]);
-
-        showToast(`${name} berhasil dihapus!`);
-        await fetchAllData();
-        showSection(currentSection);
-
-    } catch (e) {
-        showToast('Gagal menghapus: ' + e.message, 'error');
-    }
-}
-
-function deleteUser(id) { deleteRecord('pengguna', id, 'User'); }
-function deleteAlumni(id) { deleteRecord('alumni', id, 'Alumni'); }
-function deleteKelas(id) { deleteRecord('kelas', id, 'Kelas'); }
-function deleteAngkatan(id) { deleteRecord('angkatan', id, 'Angkatan'); }
-function deleteStruktur(id) { deleteRecord('struktur_organisasi', id, 'Struktur'); }
-function deleteAlbum(id) { deleteRecord('album', id, 'Album'); }
-function deleteMedia(id) { deleteRecord('media', id, 'Media'); }
-function deletePengumuman(id) { deleteRecord('pengumuman', id, 'Pengumuman'); }
-
-// ============================================================
-// 25. EDIT FUNCTIONS
-// ============================================================
-function editUser(id) { openModal('user', id); }
-function editAlumni(id) { openModal('alumni', id); }
-function editKelas(id) { openModal('kelas', id); }
-function editAngkatan(id) { openModal('angkatan', id); }
-function editStruktur(id) { openModal('struktur', id); }
-function editAlbum(id) { openModal('album', id); }
-function editMedia(id) { openModal('media', id); }
-function editPengumuman(id) { openModal('pengumuman', id); }
-
-// ============================================================
-// 26. CLEAR LOGS
-// ============================================================
-async function clearLogs() {
-    if (!confirm('Yakin ingin menghapus semua log?')) return;
-    try {
-        const { error } = await sb.from('activity_log').delete().neq('id', '');
-        if (error) throw error;
-        showToast('Log berhasil dihapus!');
-        await fetchAllData();
-        showSection('logs');
-    } catch (e) {
-        showToast('Gagal menghapus log: ' + e.message, 'error');
-    }
-}
-
-// ============================================================
-// 27. LOGOUT
-// ============================================================
-function logout() {
-    if (confirm('Yakin ingin logout?')) {
-        localStorage.removeItem('userSession');
-        window.location.href = 'login.html';
-    }
-}
-
-// ============================================================
-// 28. INIT
-// ============================================================
-initTheme();
-checkSession();
-fetchAllData();
-
-// Handle click outside modal
-document.getElementById('modal').addEventListener('click', (e) => {
-    if (e.target === e.currentTarget) closeModal();
-});
-
-// Keyboard shortcut
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        if (document.getElementById('modal').classList.contains('active')) {
-            closeModal();
-        }
-    }
-});
-</script>
-</body>
-                                                        </html>
+                <select name="tipe" class="form-select" id="mediaTipeSelect">
+                    <option value="foto" ${data?.tipe !== 'video
