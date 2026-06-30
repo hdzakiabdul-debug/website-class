@@ -804,6 +804,55 @@ const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
 const sb = window.supabase.createClient(SB_URL, SB_ANON);
 
 // ============================================================
+// 1B. CLOUDINARY (upload foto & video langsung)
+// ============================================================
+const CLD_NAME = 'dayfamkrv';
+const CLD_PRESET = 'class2k26.Unsigned';
+
+function uploadToCloudinary(file, onProgress) {
+    return new Promise((resolve, reject) => {
+        const fd = new FormData();
+        fd.append('file', file);
+        fd.append('upload_preset', CLD_PRESET);
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLD_NAME}/auto/upload`);
+        xhr.timeout = 90000;
+        if (onProgress) {
+            xhr.upload.onprogress = (e) => {
+                if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100));
+            };
+        }
+        xhr.onload = () => {
+            if (xhr.status === 200) {
+                try {
+                    const res = JSON.parse(xhr.responseText);
+                    resolve({ url: res.secure_url, resourceType: res.resource_type });
+                } catch (err) { reject(new Error('Gagal membaca respons upload')); }
+            } else {
+                reject(new Error('Upload gagal (HTTP ' + xhr.status + ')'));
+            }
+        };
+        xhr.ontimeout = () => reject(new Error('Upload timeout — coba file yang lebih kecil'));
+        xhr.onerror = () => reject(new Error('Gagal terhubung ke server upload'));
+        xhr.send(fd);
+    });
+}
+
+function previewFileInput(input, previewId) {
+    const el = document.getElementById(previewId);
+    if (!el || !input.files || !input.files[0]) return;
+    const file = input.files[0];
+    const isVideo = file.type.startsWith('video/');
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        el.innerHTML = isVideo
+            ? `<video src="${e.target.result}" controls style="max-width:100%;max-height:180px;border-radius:8px;margin-top:8px"></video>`
+            : `<img src="${e.target.result}" style="max-width:100%;max-height:180px;border-radius:8px;margin-top:8px;object-fit:cover"/>`;
+    };
+    reader.readAsDataURL(file);
+}
+
+// ============================================================
 // 2. STATE
 // ============================================================
 let currentUser = null;
@@ -1162,8 +1211,11 @@ function generateFormFields(type, data = null) {
                 <input type="text" name="tahun" class="form-input" value="${data?.tahun || ''}"/>
             </div>
             <div class="form-group">
-                <label class="form-label">Cover (URL)</label>
-                <input type="text" name="cover" class="form-input" value="${data?.cover || ''}" placeholder="https://..."/>
+                <label class="form-label">Cover Album (Upload Foto)</label>
+                <input type="file" name="cover_file" class="form-input" accept="image/*" onchange="previewFileInput(this,'coverPreview')"/>
+                <div id="coverPreview">${data?.cover ? `<img src="${data.cover}" style="max-width:100%;max-height:180px;border-radius:8px;margin-top:8px;object-fit:cover"/>` : ''}</div>
+                <input type="hidden" name="cover" value="${data?.cover || ''}"/>
+                <div class="form-hint">${editId ? 'Kosongkan jika tidak ingin mengganti cover' : 'Opsional'}</div>
             </div>
             <div class="form-group">
                 <label class="form-label">Status</label>
@@ -1194,18 +1246,24 @@ function generateFormFields(type, data = null) {
             </div>
             <div class="form-group">
                 <label class="form-label">Tipe</label>
-                <select name="tipe" class="form-select">
-                    <option value="foto" ${data?.tipe === 'foto' ? 'selected' : ''}>Foto</option>
+                <select name="tipe" class="form-select" id="mediaTipeSelect">
+                    <option value="foto" ${data?.tipe !== 'video' ? 'selected' : ''}>Foto</option>
                     <option value="video" ${data?.tipe === 'video' ? 'selected' : ''}>Video</option>
                 </select>
+                <div class="form-hint">Pilih sesuai jenis file yang akan diupload</div>
             </div>
             <div class="form-group">
-                <label class="form-label">URL <span class="required">*</span></label>
-                <input type="text" name="url" class="form-input" value="${data?.url || ''}" required/>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Thumbnail (URL)</label>
-                <input type="text" name="thumbnail" class="form-input" value="${data?.thumbnail || ''}"/>
+                <label class="form-label">Upload Foto / Video ${editId ? '' : '<span class="required">*</span>'}</label>
+                <input type="file" name="media_file" class="form-input" accept="image/*,video/*" ${editId ? '' : 'required'} onchange="previewFileInput(this,'mediaPreview')"/>
+                <div class="upload-progress" id="mediaUploadProgress" style="display:none;height:6px;background:var(--bg2);border-radius:99px;margin-top:8px;overflow:hidden">
+                    <div id="mediaUploadBar" style="height:100%;width:0%;background:var(--accent);transition:width .2s"></div>
+                </div>
+                <div id="mediaPreview">${data?.url ? (data?.tipe === 'video'
+                    ? `<video src="${data.url}" controls style="max-width:100%;max-height:180px;border-radius:8px;margin-top:8px"></video>`
+                    : `<img src="${data.thumbnail || data.url}" style="max-width:100%;max-height:180px;border-radius:8px;margin-top:8px;object-fit:cover"/>`) : ''}</div>
+                <input type="hidden" name="url" value="${data?.url || ''}"/>
+                <input type="hidden" name="thumbnail" value="${data?.thumbnail || ''}"/>
+                <div class="form-hint">Foto maks 10MB, video maks 100MB. Tidak ada batas jumlah foto per album.</div>
             </div>
             <div class="form-group">
                 <label class="form-label">Status</label>
@@ -1227,8 +1285,13 @@ function generateFormFields(type, data = null) {
                 <textarea name="konten" class="form-input" rows="5" required>${data?.konten || ''}</textarea>
             </div>
             <div class="form-group">
-                <label class="form-label">Gambar (URL)</label>
-                <input type="text" name="gambar" class="form-input" value="${data?.gambar || ''}" placeholder="https://..."/>
+                <label class="form-label">Gambar (Upload — Opsional)</label>
+                <input type="file" name="gambar_file" class="form-input" accept="image/*" onchange="previewFileInput(this,'pengumumanPreview')"/>
+                <div class="upload-progress" id="pengumumanUploadProgress" style="display:none;height:6px;background:var(--bg2);border-radius:99px;margin-top:8px;overflow:hidden">
+                    <div id="pengumumanUploadBar" style="height:100%;width:0%;background:var(--accent);transition:width .2s"></div>
+                </div>
+                <div id="pengumumanPreview">${data?.gambar ? `<img src="${data.gambar}" style="max-width:100%;max-height:180px;border-radius:8px;margin-top:8px;object-fit:cover"/>` : ''}</div>
+                <input type="hidden" name="gambar" value="${data?.gambar || ''}"/>
             </div>
             <div class="form-group">
                 <label class="form-label">Target Role</label>
@@ -1261,8 +1324,13 @@ async function saveData(e) {
     const form = e.target;
     const formData = new FormData(form);
     const data = {};
+    const fileInputs = {};
 
     for (let [key, value] of formData.entries()) {
+        if (value instanceof File) {
+            if (value.size > 0) fileInputs[key] = value;
+            continue;
+        }
         data[key] = value;
     }
 
@@ -1271,6 +1339,43 @@ async function saveData(e) {
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
 
     try {
+        // ===== UPLOAD FILE KE CLOUDINARY (jika ada) =====
+        if (fileInputs.cover_file) {
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengupload cover...';
+            const res = await uploadToCloudinary(fileInputs.cover_file);
+            data.cover = res.url;
+        }
+        if (fileInputs.gambar_file) {
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengupload gambar...';
+            const wrapEl = document.getElementById('pengumumanUploadProgress');
+            if (wrapEl) wrapEl.style.display = 'block';
+            const res = await uploadToCloudinary(fileInputs.gambar_file, (p) => {
+                const bar = document.getElementById('pengumumanUploadBar');
+                if (bar) bar.style.width = p + '%';
+            });
+            data.gambar = res.url;
+        }
+        if (fileInputs.media_file) {
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengupload media...';
+            document.getElementById('mediaUploadProgress').style.display = 'block';
+            const res = await uploadToCloudinary(fileInputs.media_file, (p) => {
+                document.getElementById('mediaUploadBar').style.width = p + '%';
+            });
+            data.url = res.url;
+            data.tipe = res.resourceType === 'video' ? 'video' : 'foto';
+            data.thumbnail = res.resourceType === 'video'
+                ? res.url.replace('/upload/', '/upload/c_thumb,w_500,h_500,so_0/').replace(/\.(mp4|mov|webm|mkv)$/i, '.jpg')
+                : res.url;
+        }
+
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+
+        if (editId) {
+            Object.keys(data).forEach(k => {
+                if ((k === 'cover' || k === 'gambar' || k === 'url') && data[k] === '') delete data[k];
+            });
+        }
+
         let table = '';
         let result;
 
@@ -1352,4 +1457,4 @@ document.getElementById('modal').addEventListener('click', (e) => {
 });
 </script>
 </body>
-</html>
+   </html>
