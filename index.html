@@ -1023,8 +1023,8 @@ footer {
     <section id="alumni" class="wrap section">
         <div class="sec-head">
             <div>
-                <h2 class="sec-title"><i class="fas fa-users"></i> Daftar Alumni</h2>
-                <p class="sec-sub">Temukan teman-teman alumni</p>
+                <h2 class="sec-title"><i class="fas fa-users"></i> <span id="secAlumniTitle">Daftar Alumni</span></h2>
+                <p class="sec-sub" id="secAlumniSub">Temukan teman-teman alumni</p>
             </div>
             <div class="search-wrap">
                 <i class="fas fa-search"></i>
@@ -1038,8 +1038,8 @@ footer {
     <section id="album" class="wrap section">
         <div class="sec-head">
             <div>
-                <h2 class="sec-title"><i class="fas fa-images"></i> Album Kenangan</h2>
-                <p class="sec-sub">Koleksi foto dan video kenangan</p>
+                <h2 class="sec-title"><i class="fas fa-images"></i> <span id="secAlbumTitle">Album Kenangan</span></h2>
+                <p class="sec-sub" id="secAlbumSub">Koleksi foto dan video kenangan</p>
             </div>
         </div>
         <div class="album-grid" id="albumContainer"></div>
@@ -1049,8 +1049,8 @@ footer {
     <section id="struktur" class="wrap section">
         <div class="sec-head">
             <div>
-                <h2 class="sec-title"><i class="fas fa-sitemap"></i> Struktur Organisasi</h2>
-                <p class="sec-sub">Susunan pengurus dan struktur kelas</p>
+                <h2 class="sec-title"><i class="fas fa-sitemap"></i> <span id="secStrukturTitle">Struktur Organisasi</span></h2>
+                <p class="sec-sub" id="secStrukturSub">Susunan pengurus dan struktur kelas</p>
             </div>
         </div>
         <div id="strukturContainer"></div>
@@ -1060,8 +1060,8 @@ footer {
     <section id="pengumuman" class="wrap section">
         <div class="sec-head">
             <div>
-                <h2 class="sec-title"><i class="fas fa-bullhorn"></i> Pengumuman</h2>
-                <p class="sec-sub">Informasi terbaru untuk alumni</p>
+                <h2 class="sec-title"><i class="fas fa-bullhorn"></i> <span id="secPengumumanTitle">Pengumuman</span></h2>
+                <p class="sec-sub" id="secPengumumanSub">Informasi terbaru untuk alumni</p>
             </div>
         </div>
         <div class="pengumuman-grid" id="pengumumanContainer"></div>
@@ -1267,14 +1267,35 @@ function applyConfig() {
     document.getElementById('footerBrand').innerHTML = html;
 
     // Hero
+    document.getElementById('heroChip').textContent = c.hero_chip || c.site_tagline || 'Portal Alumni';
     if (c.hero_title) document.getElementById('heroTitle').innerHTML = c.hero_title.replace(/\\n/g, '<br/>');
     if (c.hero_desc) document.getElementById('heroDesc').textContent = c.hero_desc;
-    if (c.hero_chip) document.getElementById('heroChip').textContent = c.hero_chip;
 
-    // Footer
-    const year = new Date().getFullYear();
-    const owner = c.owner_name || 'XREZZKY OFFICIAL';
-    document.getElementById('footerCopy').innerHTML = `© ${year} ${owner}. All Rights Reserved.`;
+    // Section titles & subtitles (dapat diatur dari dashboard Owner)
+    const secMap = {
+        secAlumniTitle: c.sec_alumni_title || 'Daftar Alumni',
+        secAlumniSub: c.sec_alumni_sub || 'Temukan teman-teman alumni',
+        secAlbumTitle: c.sec_album_title || 'Album Kenangan',
+        secAlbumSub: c.sec_album_sub || 'Koleksi foto dan video kenangan',
+        secStrukturTitle: c.sec_struktur_title || 'Struktur Organisasi',
+        secStrukturSub: c.sec_struktur_sub || 'Susunan pengurus dan struktur kelas',
+        secPengumumanTitle: c.sec_pengumuman_title || 'Pengumuman',
+        secPengumumanSub: c.sec_pengumuman_sub || 'Informasi terbaru untuk alumni'
+    };
+    Object.keys(secMap).forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = secMap[id];
+    });
+
+    // Footer copyright — prioritaskan teks copyright kustom dari Owner,
+    // jika kosong baru dibuat otomatis dari Owner Name.
+    if (c.copyright_text && c.copyright_text.trim()) {
+        document.getElementById('footerCopy').innerHTML = c.copyright_text;
+    } else {
+        const year = new Date().getFullYear();
+        const owner = c.owner_name || 'XREZZKY OFFICIAL';
+        document.getElementById('footerCopy').innerHTML = `© ${year} ${owner}. All Rights Reserved.`;
+    }
 
     // Social Media
     const socials = document.getElementById('footerSocials');
@@ -1557,4 +1578,4 @@ checkSession();
 fetchAll();
 </script>
 </body>
-   </html>
+                       </html>
