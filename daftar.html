@@ -440,46 +440,25 @@ textarea.form-input {
             </div>
         </div>
 
-        <!-- Role Selection -->
+        <!-- NIS (untuk data alumni) -->
         <div class="form-group">
-            <label class="form-label">Pilih Role <span class="required">*</span></label>
-            <div class="role-selector">
-                <div class="role-card selected" data-role="alumni" onclick="selectRole('alumni')">
-                    <span class="role-icon">🎓</span>
-                    <div class="role-name">Alumni</div>
-                    <div class="role-desc">Lihat informasi & profil</div>
-                    <span class="role-badge alumni">Alumni</span>
-                </div>
-                <div class="role-card" data-role="moderator" onclick="selectRole('moderator')">
-                    <span class="role-icon">⚡</span>
-                    <div class="role-name">Moderator</div>
-                    <div class="role-desc">Kelola konten</div>
-                    <span class="role-badge moderator">Moderator</span>
-                </div>
-                <div class="role-card" data-role="admin" onclick="selectRole('admin')">
-                    <span class="role-icon">🛡️</span>
-                    <div class="role-name">Admin</div>
-                    <div class="role-desc">Kelola semua data</div>
-                    <span class="role-badge admin">Admin</span>
-                </div>
-                <div class="role-card" data-role="owner" onclick="selectRole('owner')">
-                    <span class="role-icon">👑</span>
-                    <div class="role-name">Owner</div>
-                    <div class="role-desc">Akses penuh sistem</div>
-                    <span class="role-badge owner">Owner</span>
-                </div>
+            <label class="form-label">NIS <span class="required">*</span></label>
+            <div class="input-wrap">
+                <i class="fas fa-id-card"></i>
+                <input type="text" id="nis" class="form-input" placeholder="Nomor Induk Siswa" required/>
             </div>
-            <input type="hidden" id="role" value="alumni"/>
         </div>
 
-        <!-- Kelas (untuk Admin/Moderator) -->
-        <div class="form-group" id="kelasGroup" style="display:none;">
-            <label class="form-label">Pilih Kelas <span class="required">*</span></label>
+        <!-- Kelas (untuk data alumni) -->
+        <div class="form-group">
+            <label class="form-label">Kelas Asal</label>
             <select id="kelas_id" class="form-select">
                 <option value="">Pilih Kelas</option>
             </select>
-            <div class="form-hint">User akan mengelola kelas ini</div>
+            <div class="form-hint">Kelas saat masih bersekolah</div>
         </div>
+
+        <input type="hidden" id="role" value="alumni"/>
 
         <!-- No HP -->
         <div class="form-group">
@@ -552,25 +531,10 @@ function togglePassword(inputId, iconId) {
 }
 
 // ============================================================
-// 5. SELECT ROLE
+// 5. (Role selection dihapus — semua pendaftar publik otomatis
+//    menjadi role 'alumni'. Role owner/admin/moderator hanya
+//    bisa dibuat oleh Owner lewat Dashboard Owner > Pengguna)
 // ============================================================
-function selectRole(role) {
-    selectedRole = role;
-    document.getElementById('role').value = role;
-
-    document.querySelectorAll('.role-card').forEach(card => {
-        card.classList.toggle('selected', card.dataset.role === role);
-    });
-
-    const kelasGroup = document.getElementById('kelasGroup');
-    if (role === 'admin' || role === 'moderator') {
-        kelasGroup.style.display = 'block';
-        document.getElementById('kelas_id').required = true;
-    } else {
-        kelasGroup.style.display = 'none';
-        document.getElementById('kelas_id').required = false;
-    }
-}
 
 // ============================================================
 // 6. LOAD KELAS
@@ -633,8 +597,9 @@ async function handleRegister(e) {
     const email = document.getElementById('email').value.trim() || null;
     const password = document.getElementById('password').value;
     const passwordConfirm = document.getElementById('password_confirm').value;
-    const role = document.getElementById('role').value;
-    const kelas_id = document.getElementById('kelas_id').value;
+    const role = 'alumni'; // Role pendaftaran publik SELALU alumni — tidak bisa dipilih
+    const nis = document.getElementById('nis').value.trim();
+    const kelas_id = document.getElementById('kelas_id').value || null;
     const no_hp = document.getElementById('no_hp').value.trim() || null;
 
     const registerBtn = document.getElementById('registerBtn');
@@ -670,9 +635,9 @@ async function handleRegister(e) {
         return;
     }
 
-    if ((role === 'admin' || role === 'moderator') && !kelas_id) {
-        showMessage('Pilih kelas untuk role Admin/Moderator', 'error');
-        document.getElementById('kelas_id').focus();
+    if (!nis) {
+        showMessage('NIS wajib diisi', 'error');
+        document.getElementById('nis').focus();
         return;
     }
 
@@ -702,16 +667,12 @@ async function handleRegister(e) {
             username: username,
             password: hashedPassword,
             nama: nama,
-            role: role,
+            role: role, // selalu 'alumni' — tidak bisa diubah dari form publik
             email: email,
             no_hp: no_hp,
             is_active: true,
             created_at: new Date().toISOString()
         };
-
-        if (kelas_id && (role === 'admin' || role === 'moderator')) {
-            dataPengguna.kelas_id = kelas_id;
-        }
 
         const { data, error } = await sb
             .from('pengguna')
@@ -728,12 +689,14 @@ async function handleRegister(e) {
             return;
         }
 
-        // Jika role alumni, tambahkan ke tabel alumni
-        if (role === 'alumni' && data && data.length > 0) {
+        // Setiap pendaftar publik otomatis dibuatkan record alumni
+        if (data && data.length > 0) {
             const userId = data[0].id;
             const alumniData = {
                 pengguna_id: userId,
+                nis: nis,
                 nama_lengkap: nama,
+                kelas_id: kelas_id,
                 email: email || null,
                 no_telepon: no_hp || null,
                 status: 'active'
@@ -745,7 +708,6 @@ async function handleRegister(e) {
 
             if (alumniError) {
                 console.error('Error creating alumni record:', alumniError);
-                // Delete user if alumni creation fails? Or just log it
             }
         }
 
@@ -760,13 +722,12 @@ async function handleRegister(e) {
         }]);
 
         showMessage(`
-            ✅ Pendaftaran berhasil! Selamat datang <strong>${nama}</strong> sebagai <strong>${role}</strong>.
+            ✅ Pendaftaran berhasil! Selamat datang <strong>${nama}</strong>.
             <br>Silakan <a href="login.html" style="color:var(--accent);font-weight:600;">login</a> untuk melanjutkan.
         `, 'success');
 
         // Reset form
         document.getElementById('registerForm').reset();
-        selectRole('alumni');
 
         setTimeout(() => {
             registerBtn.classList.remove('loading');
@@ -846,4 +807,4 @@ loadKelas();
 checkSession();
 </script>
 </body>
-  </html>
+</html>
