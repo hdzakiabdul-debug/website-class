@@ -275,21 +275,51 @@ ul { list-style: none; }
 .section { padding: 32px 0; }
 
 /* ============================================================
-   HERO
+   HERO CAROUSEL
    ============================================================ */
 .hero { padding: 36px 0 28px; }
-.hero-card {
-    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+.hero-carousel {
+    position: relative;
     border-radius: 24px;
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+}
+.hero-track {
+    display: flex;
+    transition: transform .6s cubic-bezier(.4,0,.2,1);
+}
+.hero-slide {
+    min-width: 100%;
+    position: relative;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
     padding: 44px 52px;
     display: grid;
     grid-template-columns: 1fr 160px;
     align-items: center;
     gap: 32px;
-    position: relative;
-    overflow: hidden;
+    min-height: 320px;
 }
-.hero-card::before {
+.hero-slide-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+}
+.hero-slide-bg img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.hero-slide-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(79,110,247,.78) 0%, rgba(124,58,237,.78) 100%);
+}
+.hero-slide-content {
+    position: relative;
+    z-index: 1;
+}
+.hero-slide::before {
     content: '';
     position: absolute;
     top: -80px;
@@ -298,8 +328,9 @@ ul { list-style: none; }
     height: 340px;
     background: rgba(255,255,255,.06);
     border-radius: 50%;
+    z-index: 0;
 }
-.hero-card::after {
+.hero-slide::after {
     content: '';
     position: absolute;
     bottom: -100px;
@@ -308,6 +339,7 @@ ul { list-style: none; }
     height: 240px;
     background: rgba(255,255,255,.04);
     border-radius: 50%;
+    z-index: 0;
 }
 .hero-chip {
     display: inline-flex;
@@ -332,10 +364,11 @@ ul { list-style: none; }
 }
 .hero-desc {
     font-size: 15px;
-    color: rgba(255,255,255,.78);
+    color: rgba(255,255,255,.85);
     line-height: 1.75;
     max-width: 500px;
     margin-bottom: 28px;
+    text-shadow: 0 1px 4px rgba(0,0,0,.15);
 }
 .hero-actions {
     display: flex;
@@ -346,7 +379,8 @@ ul { list-style: none; }
     width: 140px;
     height: 140px;
     border-radius: 50%;
-    background: rgba(255,255,255,.12);
+    background: rgba(255,255,255,.15);
+    backdrop-filter: blur(4px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -354,10 +388,64 @@ ul { list-style: none; }
     position: relative;
     z-index: 1;
     flex-shrink: 0;
+    overflow: hidden;
+}
+.hero-orb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
 }
 @media (max-width: 640px) {
-    .hero-card { grid-template-columns: 1fr; padding: 28px 24px; }
+    .hero-slide { grid-template-columns: 1fr; padding: 28px 24px; min-height: 260px; }
     .hero-orb { display: none; }
+}
+
+/* Carousel controls */
+.hero-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.18);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255,255,255,.3);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 5;
+    transition: all .2s;
+    font-size: 14px;
+}
+.hero-arrow:hover { background: rgba(255,255,255,.32); }
+.hero-arrow-prev { left: 16px; }
+.hero-arrow-next { right: 16px; }
+.hero-dots {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 7px;
+    z-index: 5;
+}
+.hero-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.4);
+    cursor: pointer;
+    transition: all .25s;
+    border: none;
+    padding: 0;
+}
+.hero-dot.active { width: 22px; border-radius: 99px; background: #fff; }
+@media (max-width: 640px) {
+    .hero-arrow { width: 32px; height: 32px; font-size: 12px; }
 }
 
 /* ============================================================
@@ -562,6 +650,23 @@ ul { list-style: none; }
     margin-top: 6px;
 }
 .album-meta i { color: var(--accent); font-size: 10.5px; }
+.album-count-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(0,0,0,.55);
+    backdrop-filter: blur(4px);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 99px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    z-index: 2;
+}
+.album-count-badge i { color: #fff; font-size: 10px; }
 
 /* ============================================================
    STRUKTUR
@@ -969,19 +1074,27 @@ footer {
    ============================================================ -->
 <main>
 
-    <!-- ========== HERO ========== -->
+    <!-- ========== HERO CAROUSEL ========== -->
     <section id="beranda" class="hero wrap">
-        <div class="hero-card">
-            <div>
-                <div class="hero-chip"><i class="fas fa-star" style="font-size:10px"></i> <span id="heroChip">Portal Alumni</span></div>
-                <h1 class="hero-title" id="heroTitle">Selamat Datang di<br/>Portal Alumni</h1>
-                <p class="hero-desc" id="heroDesc">Menjaga silaturahmi dan kebersamaan alumni. Temukan teman lama, lihat album kenangan, dan tetap terhubung.</p>
-                <div class="hero-actions">
-                    <a href="#alumni" class="btn btn-white"><i class="fas fa-users"></i> Lihat Alumni</a>
-                    <a href="#album" class="btn btn-glass"><i class="fas fa-images"></i> Album Kenangan</a>
+        <div class="hero-carousel" id="heroCarousel">
+            <div class="hero-track" id="heroTrack">
+                <!-- slide default (dipakai jika belum ada hero_slides di database) -->
+                <div class="hero-slide">
+                    <div class="hero-slide-content">
+                        <div class="hero-chip"><i class="fas fa-star" style="font-size:10px"></i> <span id="heroChip">Portal Alumni</span></div>
+                        <h1 class="hero-title" id="heroTitle">Selamat Datang di<br/>Portal Alumni</h1>
+                        <p class="hero-desc" id="heroDesc">Menjaga silaturahmi dan kebersamaan alumni. Temukan teman lama, lihat album kenangan, dan tetap terhubung.</p>
+                        <div class="hero-actions">
+                            <a href="#alumni" class="btn btn-white"><i class="fas fa-users"></i> Lihat Alumni</a>
+                            <a href="#album" class="btn btn-glass"><i class="fas fa-images"></i> Album Kenangan</a>
+                        </div>
+                    </div>
+                    <div class="hero-orb">🎓</div>
                 </div>
             </div>
-            <div class="hero-orb">🎓</div>
+            <button class="hero-arrow hero-arrow-prev" id="heroPrevBtn" onclick="heroNav(-1)" style="display:none"><i class="fas fa-chevron-left"></i></button>
+            <button class="hero-arrow hero-arrow-next" id="heroNextBtn" onclick="heroNav(1)" style="display:none"><i class="fas fa-chevron-right"></i></button>
+            <div class="hero-dots" id="heroDots"></div>
         </div>
     </section>
 
@@ -1134,13 +1247,18 @@ const sb = window.supabase.createClient(SB_URL, SB_ANON);
 let allAlumni = [];
 let allKelas = [];
 let allAlbum = [];
+let allMedia = [];
 let allStruktur = [];
 let allPengumuman = [];
 let allAngkatan = [];
+let heroSlides = [];
 let siteConfig = {};
 let lbList = [];
 let lbIdx = 0;
+let lbAlbum = null;
 let currentUser = null;
+let heroIdx = 0;
+let heroTimer = null;
 
 // ============================================================
 // 3. THEME
@@ -1217,14 +1335,16 @@ function showToast(message, type = 'success') {
 // ============================================================
 async function fetchAll() {
     try {
-        const [r1, r2, r3, r4, r5, r6, r7] = await Promise.all([
+        const [r1, r2, r3, r4, r5, r6, r7, r8, r9] = await Promise.all([
             sb.from('alumni').select('*').order('nama_lengkap'),
             sb.from('kelas').select('*').order('nama_kelas'),
             sb.from('album').select('*').eq('status', 'published').order('created_at', { ascending: false }),
             sb.from('struktur_organisasi').select('*').order('urutan'),
             sb.from('pengumuman').select('*').eq('status', 'published').order('created_at', { ascending: false }),
             sb.from('angkatan').select('*').order('tahun', { ascending: false }),
-            sb.from('site_config').select('*').limit(1).maybeSingle()
+            sb.from('site_config').select('*').limit(1).maybeSingle(),
+            sb.from('hero_slides').select('*').eq('is_active', true).order('urutan'),
+            sb.from('media').select('*').order('urutan')
         ]);
 
         allAlumni = r1.data || [];
@@ -1234,8 +1354,11 @@ async function fetchAll() {
         allPengumuman = r5.data || [];
         allAngkatan = r6.data || [];
         siteConfig = r7.data || {};
+        heroSlides = r8.data || [];
+        allMedia = r9.data || [];
 
         applyConfig();
+        renderHero();
         renderStats();
         renderAlumni();
         renderAlbum();
@@ -1319,8 +1442,93 @@ function applyConfig() {
 }
 
 // ============================================================
-// 8. RENDER STATS
+// 7B. HERO CAROUSEL
 // ============================================================
+function renderHero() {
+    const track = document.getElementById('heroTrack');
+    const dots = document.getElementById('heroDots');
+    const prevBtn = document.getElementById('heroPrevBtn');
+    const nextBtn = document.getElementById('heroNextBtn');
+
+    if (!heroSlides.length) {
+        // Tidak ada slide custom dari Owner — pakai slide default yang sudah ada di HTML
+        dots.innerHTML = '';
+        prevBtn.style.display = 'none';
+        nextBtn.style.display = 'none';
+        return;
+    }
+
+    track.innerHTML = heroSlides.map((s) => {
+        const bg = s.gambar ? `<div class="hero-slide-bg"><img src="${s.gambar}" alt="${s.judul || ''}" loading="lazy"/></div>` : '';
+        const chip = s.chip || siteConfig.hero_chip || siteConfig.site_tagline || 'Portal Alumni';
+        const title = (s.judul || siteConfig.hero_title || 'Selamat Datang').replace(/\\n/g, '<br/>');
+        const desc = s.deskripsi || siteConfig.hero_desc || '';
+        return `
+            <div class="hero-slide">
+                ${bg}
+                <div class="hero-slide-content">
+                    <div class="hero-chip"><i class="fas fa-star" style="font-size:10px"></i> ${chip}</div>
+                    <h1 class="hero-title">${title}</h1>
+                    ${desc ? `<p class="hero-desc">${desc}</p>` : ''}
+                    <div class="hero-actions">
+                        <a href="#alumni" class="btn btn-white"><i class="fas fa-users"></i> Lihat Alumni</a>
+                        <a href="#album" class="btn btn-glass"><i class="fas fa-images"></i> Album Kenangan</a>
+                    </div>
+                </div>
+                <div class="hero-orb">${s.gambar ? `<img src="${s.gambar}" alt=""/>` : '🎓'}</div>
+            </div>
+        `;
+    }).join('');
+
+    if (heroSlides.length > 1) {
+        dots.innerHTML = heroSlides.map((_, i) => `<button class="hero-dot${i === 0 ? ' active' : ''}" onclick="heroGoTo(${i})"></button>`).join('');
+        prevBtn.style.display = 'flex';
+        nextBtn.style.display = 'flex';
+        startHeroAutoplay();
+    } else {
+        dots.innerHTML = '';
+        prevBtn.style.display = 'none';
+        nextBtn.style.display = 'none';
+    }
+
+    heroIdx = 0;
+    updateHeroPosition();
+}
+
+function updateHeroPosition() {
+    const track = document.getElementById('heroTrack');
+    track.style.transform = `translateX(-${heroIdx * 100}%)`;
+    document.querySelectorAll('.hero-dot').forEach((d, i) => d.classList.toggle('active', i === heroIdx));
+}
+
+function heroGoTo(i) {
+    heroIdx = i;
+    updateHeroPosition();
+    restartHeroAutoplay();
+}
+
+function heroNav(dir) {
+    const total = heroSlides.length || 1;
+    heroIdx = (heroIdx + dir + total) % total;
+    updateHeroPosition();
+    restartHeroAutoplay();
+}
+
+function startHeroAutoplay() {
+    // Auto-geser pelan-pelan setiap 6 detik, berhenti otomatis kalau cuma 1 slide
+    if (heroTimer) clearInterval(heroTimer);
+    if (heroSlides.length <= 1) return;
+    heroTimer = setInterval(() => {
+        heroIdx = (heroIdx + 1) % heroSlides.length;
+        updateHeroPosition();
+    }, 6000);
+}
+
+function restartHeroAutoplay() {
+    startHeroAutoplay();
+}
+
+
 function renderStats() {
     document.getElementById('totalAlumni').textContent = allAlumni.length;
     document.getElementById('totalKelas').textContent = allKelas.length;
@@ -1409,12 +1617,15 @@ function renderAlbum() {
         return;
     }
 
-    container.innerHTML = allAlbum.map((a, i) => {
-        const cover = a.cover || 'https://placehold.co/400x400/EEF2FF/4F6EF7?text=Album';
+    container.innerHTML = allAlbum.map((a) => {
+        const items = allMedia.filter(m => m.album_id === a.id);
+        const cover = a.cover || items[0]?.thumbnail || items[0]?.url || 'https://placehold.co/400x400/EEF2FF/4F6EF7?text=Album';
+        const videoCount = items.filter(m => m.tipe === 'video').length;
         return `
-            <div class="album-card" onclick="openAlbumLb(${i})">
+            <div class="album-card" onclick="openAlbumLb('${a.id}')">
                 <div class="album-thumb">
                     <img src="${cover}" alt="${a.judul}" loading="lazy" onerror="this.src='https://placehold.co/400x400/EEF2FF/4F6EF7?text=Error'"/>
+                    ${items.length ? `<span class="album-count-badge"><i class="fas ${videoCount ? 'fa-photo-film' : 'fa-image'}"></i> ${items.length}</span>` : ''}
                 </div>
                 <div class="album-info">
                     <div class="album-title">${a.judul || 'Tanpa Judul'}</div>
@@ -1500,30 +1711,48 @@ function renderPengumuman() {
 // ============================================================
 // 15. LIGHTBOX
 // ============================================================
-function openAlbumLb(index) {
-    lbList = allAlbum;
-    lbIdx = index;
+function openAlbumLb(albumId) {
+    const album = allAlbum.find(a => a.id === albumId);
+    let items = allMedia.filter(m => m.album_id === albumId).sort((x, y) => (x.urutan || 0) - (y.urutan || 0));
+
+    // Fallback: kalau album belum punya media items, tampilkan cover album sebagai satu-satunya item
+    if (!items.length && album?.cover) {
+        items = [{ id: 'cover', tipe: 'foto', url: album.cover, thumbnail: album.cover, judul: album.judul, caption: album.deskripsi }];
+    }
+    if (!items.length) return;
+
+    lbList = items;
+    lbAlbum = album;
+    lbIdx = 0;
     renderLb();
     document.getElementById('lightbox').classList.add('open');
     document.body.style.overflow = 'hidden';
 }
 
 function renderLb() {
-    const a = lbList[lbIdx];
-    if (!a) return;
+    const m = lbList[lbIdx];
+    if (!m) return;
+    const album = lbAlbum;
 
-    document.getElementById('lbTitle').textContent = a.judul || 'Tanpa Judul';
-    document.getElementById('lbSub').textContent = a.kelas_id ? getKelasName(a.kelas_id) : '—';
-    document.getElementById('lbDesc').textContent = a.deskripsi || 'Tidak ada deskripsi';
+    document.getElementById('lbTitle').textContent = m.judul || album?.judul || 'Tanpa Judul';
+    document.getElementById('lbSub').textContent = album?.kelas_id ? getKelasName(album.kelas_id) : (album?.judul || '—');
+    document.getElementById('lbDesc').textContent = m.caption || album?.deskripsi || '';
 
-    const media = document.getElementById('lbMedia');
-    const cover = a.cover || 'https://placehold.co/600x400/EEF2FF/4F6EF7?text=No+Image';
-    media.innerHTML = `<img src="${cover}" alt="${a.judul}" onerror="this.src='https://placehold.co/600x400/EEF2FF/4F6EF7?text=Error'"/>`;
+    const mediaEl = document.getElementById('lbMedia');
+    const isVideo = m.tipe === 'video';
+    if (isVideo) {
+        const src = m.url || m.thumbnail || '';
+        mediaEl.innerHTML = `<video src="${src}" controls autoplay style="max-width:100%;max-height:100%"></video>`;
+    } else {
+        const src = m.url || m.thumbnail || 'https://placehold.co/600x400/EEF2FF/4F6EF7?text=No+Image';
+        mediaEl.innerHTML = `<img src="${src}" alt="${m.judul || ''}" onerror="this.src='https://placehold.co/600x400/EEF2FF/4F6EF7?text=Error'"/>`;
+    }
 
     const tags = [
-        { i: 'fa-calendar-alt', t: a.tahun || formatDate(a.created_at) },
-        ...(a.lokasi ? [{ i: 'fa-map-marker-alt', t: a.lokasi }] : []),
-        ...(a.kelas_id ? [{ i: 'fa-door-open', t: getKelasName(a.kelas_id) }] : [])
+        { i: isVideo ? 'fa-video' : 'fa-image', t: isVideo ? 'Video' : 'Foto' },
+        ...(album?.tahun ? [{ i: 'fa-calendar-alt', t: album.tahun }] : []),
+        ...(album?.lokasi ? [{ i: 'fa-map-marker-alt', t: album.lokasi }] : []),
+        ...(album?.kelas_id ? [{ i: 'fa-door-open', t: getKelasName(album.kelas_id) }] : [])
     ];
     document.getElementById('lbTags').innerHTML = tags.map(t =>
         `<span class="lb-tag"><i class="fas ${t.i}"></i>${t.t}</span>`
