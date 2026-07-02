@@ -1501,38 +1501,76 @@ async function sha256(message) {
 // 8. FETCH ALL DATA
 // ============================================================
 async function fetchAllData() {
+    // Tiap query dijalankan sendiri-sendiri dengan fallback ke [] jika gagal.
+    // Ini mencegah satu tabel yang error / belum ada menyebabkan seluruh data 0.
+    const safe = async (query, fallback = []) => {
+        try {
+            const res = await query;
+            if (res.error) {
+                console.warn('Query error:', res.error.message);
+                return fallback;
+            }
+            return res.data ?? fallback;
+        } catch (e) {
+            console.warn('Query exception:', e.message);
+            return fallback;
+        }
+    };
+    const safeSingle = async (query, fallback = {}) => {
+        try {
+            const res = await query;
+            if (res.error) {
+                console.warn('Query error:', res.error.message);
+                return fallback;
+            }
+            return res.data ?? fallback;
+        } catch (e) {
+            console.warn('Query exception:', e.message);
+            return fallback;
+        }
+    };
+
     try {
-        const [u, a, k, ang, s, alb, m, p, l, cfg, hs] = await Promise.all([
-            sb.from('pengguna').select('*').order('created_at', { ascending: false }),
-            sb.from('alumni').select('*').order('nama_lengkap'),
-            sb.from('kelas').select('*').order('nama_kelas'),
-            sb.from('angkatan').select('*').order('tahun', { ascending: false }),
-            sb.from('struktur_organisasi').select('*').order('urutan'),
-            sb.from('album').select('*').order('created_at', { ascending: false }),
-            sb.from('media').select('*').order('created_at', { ascending: false }),
-            sb.from('pengumuman').select('*').order('created_at', { ascending: false }),
-            sb.from('activity_log').select('*, pengguna(nama)').order('created_at', { ascending: false }).limit(100),
-            sb.from('site_config').select('*').limit(1).maybeSingle(),
-            sb.from('hero_slides').select('*').order('urutan')
+        [
+            allUsers,
+            allAlumni,
+            allKelas,
+            allAngkatan,
+            allStruktur,
+            allAlbum,
+            allMedia,
+            allPengumuman,
+            allLogs,
+            siteConfig,
+            allHeroSlides
+        ] = await Promise.all([
+            safe(sb.from('pengguna').select('*').order('created_at', { ascending: false })),
+            safe(sb.from('alumni').select('*').order('nama_lengkap')),
+            safe(sb.from('kelas').select('*').order('nama_kelas')),
+            safe(sb.from('angkatan').select('*').order('tahun', { ascending: false })),
+            safe(sb.from('struktur_organisasi').select('*').order('urutan')),
+            safe(sb.from('album').select('*').order('created_at', { ascending: false })),
+            safe(sb.from('media').select('*').order('created_at', { ascending: false })),
+            safe(sb.from('pengumuman').select('*').order('created_at', { ascending: false })),
+            safe(sb.from('activity_log').select('*, pengguna(nama)').order('created_at', { ascending: false }).limit(100)),
+            safeSingle(sb.from('site_config').select('*').limit(1).maybeSingle()),
+            safe(sb.from('hero_slides').select('*').order('urutan'))
         ]);
 
-        allUsers = u.data || [];
-        allAlumni = a.data || [];
-        allKelas = k.data || [];
-        allAngkatan = ang.data || [];
-        allStruktur = s.data || [];
-        allAlbum = alb.data || [];
-        allMedia = m.data || [];
-        allPengumuman = p.data || [];
-        allLogs = l.data || [];
-        siteConfig = cfg.data || {};
-        allHeroSlides = hs.data || [];
-
+        // Update sidebar brand name dari site_config jika ada
+        if (siteConfig && siteConfig.site_name) {
+            const nm = siteConfig.site_name;
+            const parts = nm.split(' ');
+            const brandHtml = parts[0] + (parts.slice(1).length ? '<span> ' + parts.slice(1).join(' ') + '</span>' : '<span></span>');
+            const brandEl = document.getElementById('sidebarBrand');
+            if (brandEl) brandEl.innerHTML = brandHtml;
+            document.title = 'Owner Dashboard - ' + nm;
+        }
         updateBadges();
         renderDashboard();
 
     } catch (e) {
-        console.error('Error fetching data:', e);
+        console.error('Fatal fetchAllData error:', e);
         showToast('Gagal memuat data: ' + e.message, 'error');
     }
 }
@@ -2295,31 +2333,4 @@ function generateFormFields(type, data = null) {
                 <label class="form-label">Status</label>
                 <select name="status" class="form-select">
                     <option value="published" ${data?.status === 'published' ? 'selected' : ''}>Published</option>
-                    <option value="draft" ${data?.status === 'draft' ? 'selected' : ''}>Draft</option>
-                    <option value="archived" ${data?.status === 'archived' ? 'selected' : ''}>Archived</option>
-                </select>
-            </div>
-        `;
-    } else if (type === 'media') {
-        html = `
-            <div class="form-group">
-                <label class="form-label">Album <span class="required">*</span></label>
-                <select name="album_id" class="form-select" required>
-                    <option value="">Pilih Album</option>
-                    ${allAlbum.map(a => `
-                        <option value="${a.id}" ${data?.album_id === a.id ? 'selected' : ''}>${a.judul}</option>
-                    `).join('')}
-                </select>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Judul</label>
-                <input type="text" name="judul" class="form-input" value="${data?.judul || ''}"/>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Caption</label>
-                <textarea name="caption" class="form-input" rows="3">${data?.caption || ''}</textarea>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Tipe</label>
-                <select name="tipe" class="form-select" id="mediaTipeSelect">
-                    <option value="foto" ${data?.tipe !== 'video
+                    <option value="draft" ${dat
