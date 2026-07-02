@@ -2333,4 +2333,377 @@ function generateFormFields(type, data = null) {
                 <label class="form-label">Status</label>
                 <select name="status" class="form-select">
                     <option value="published" ${data?.status === 'published' ? 'selected' : ''}>Published</option>
-                    <option value="draft" ${dat
+                    <option value="draft" ${data?.status === 'draft' ? 'selected' : ''}>Draft</option>
+                    <option value="archived" ${data?.status === 'archived' ? 'selected' : ''}>Archived</option>
+                </select>
+            </div>
+        `;
+    } else if (type === 'media') {
+        html = `
+            <div class="form-group">
+                <label class="form-label">Album <span class="required">*</span></label>
+                <select name="album_id" class="form-select" required>
+                    <option value="">Pilih Album</option>
+                    ${allAlbum.map(a => `
+                        <option value="${a.id}" ${data?.album_id === a.id ? 'selected' : ''}>${a.judul}</option>
+                    `).join('')}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Judul</label>
+                <input type="text" name="judul" class="form-input" value="${data?.judul || ''}"/>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Caption</label>
+                <textarea name="caption" class="form-input" rows="3">${data?.caption || ''}</textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Tipe</label>
+                <select name="tipe" class="form-select" id="mediaTipeSelect">
+                    <option value="foto" ${data?.tipe !== 'video' ? 'selected' : ''}>Foto</option>
+                    <option value="video" ${data?.tipe === 'video' ? 'selected' : ''}>Video</option>
+                </select>
+                <div class="form-hint">Pilih sesuai jenis file yang akan diupload</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Upload Foto / Video ${editId ? '' : '<span class="required">*</span>'}</label>
+                <input type="file" name="media_file" class="form-input" accept="image/*,video/*" ${editId ? '' : 'required'} onchange="previewFileInput(this,'mediaPreview')"/>
+                <div class="upload-progress" id="mediaUploadProgress" style="display:none;height:6px;background:var(--bg2);border-radius:99px;margin-top:8px;overflow:hidden">
+                    <div id="mediaUploadBar" style="height:100%;width:0%;background:var(--accent);transition:width .2s"></div>
+                </div>
+                <div id="mediaPreview">${data?.url ? (data?.tipe === 'video'
+                    ? `<video src="${data.url}" controls style="max-width:100%;max-height:180px;border-radius:8px;margin-top:8px"></video>`
+                    : `<img src="${data.thumbnail || data.url}" style="max-width:100%;max-height:180px;border-radius:8px;margin-top:8px;object-fit:cover"/>`) : ''}</div>
+                <input type="hidden" name="url" value="${data?.url || ''}"/>
+                <input type="hidden" name="thumbnail" value="${data?.thumbnail || ''}"/>
+                <div class="form-hint">Foto maks 10MB, video maks 100MB. Tidak ada batas jumlah foto per album — tambahkan sebanyak yang dibutuhkan, satu per satu.</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Urutan</label>
+                <input type="number" name="urutan" class="form-input" value="${data?.urutan || 0}"/>
+            </div>
+        `;
+    } else if (type === 'pengumuman') {
+        html = `
+            <div class="form-group">
+                <label class="form-label">Judul <span class="required">*</span></label>
+                <input type="text" name="judul" class="form-input" value="${data?.judul || ''}" required/>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Konten <span class="required">*</span></label>
+                <textarea name="konten" class="form-input" rows="5" required>${data?.konten || ''}</textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Gambar (Upload — Opsional)</label>
+                <input type="file" name="gambar_file" class="form-input" accept="image/*" onchange="previewFileInput(this,'pengumumanPreview')"/>
+                <div class="upload-progress" id="pengumumanUploadProgress" style="display:none;height:6px;background:var(--bg2);border-radius:99px;margin-top:8px;overflow:hidden">
+                    <div id="pengumumanUploadBar" style="height:100%;width:0%;background:var(--accent);transition:width .2s"></div>
+                </div>
+                <div id="pengumumanPreview">${data?.gambar ? `<img src="${data.gambar}" style="max-width:100%;max-height:180px;border-radius:8px;margin-top:8px;object-fit:cover"/>` : ''}</div>
+                <input type="hidden" name="gambar" value="${data?.gambar || ''}"/>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Target Role</label>
+                <select name="target_role" class="form-select">
+                    <option value="">Semua</option>
+                    <option value="owner" ${data?.target_role === 'owner' ? 'selected' : ''}>Owner</option>
+                    <option value="admin" ${data?.target_role === 'admin' ? 'selected' : ''}>Admin</option>
+                    <option value="moderator" ${data?.target_role === 'moderator' ? 'selected' : ''}>Moderator</option>
+                    <option value="alumni" ${data?.target_role === 'alumni' ? 'selected' : ''}>Alumni</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-select">
+                    <option value="published" ${data?.status === 'published' ? 'selected' : ''}>Published</option>
+                    <option value="draft" ${data?.status === 'draft' ? 'selected' : ''}>Draft</option>
+                </select>
+            </div>
+        `;
+    } else if (type === 'heroslide') {
+        html = `
+            <div class="form-group">
+                <label class="form-label">Foto Slide ${editId ? '' : '<span class="required">*</span>'}</label>
+                <input type="file" name="gambar_file" class="form-input" accept="image/*" ${editId ? '' : 'required'} onchange="previewFileInput(this,'heroPreview')"/>
+                <div id="heroPreview">${data?.gambar ? `<img src="${data.gambar}" style="max-width:100%;max-height:180px;border-radius:8px;margin-top:8px;object-fit:cover"/>` : ''}</div>
+                <input type="hidden" name="gambar" value="${data?.gambar || ''}"/>
+                <div class="upload-progress" id="heroUploadProgress" style="display:none;height:6px;background:var(--bg2);border-radius:99px;margin-top:8px;overflow:hidden">
+                    <div id="heroUploadBar" style="height:100%;width:0%;background:var(--accent);transition:width .2s"></div>
+                </div>
+                <div class="form-hint">Disarankan foto landscape (rasio 16:9) agar tampil rapi di semua perangkat</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Chip / Label Kecil</label>
+                <input type="text" name="chip" class="form-input" value="${data?.chip || ''}" placeholder="Portal Alumni"/>
+                <div class="form-hint">Kosongkan untuk memakai pengaturan global di Site Configuration</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Judul</label>
+                <input type="text" name="judul" class="form-input" value="${data?.judul || ''}" placeholder="Selamat Datang di\\nPortal Alumni"/>
+                <div class="form-hint">Gunakan \\n untuk baris baru. Kosongkan untuk memakai judul global.</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Deskripsi</label>
+                <textarea name="deskripsi" class="form-input" rows="3" placeholder="Kosongkan untuk memakai deskripsi global">${data?.deskripsi || ''}</textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Urutan</label>
+                <input type="number" name="urutan" class="form-input" value="${data?.urutan ?? allHeroSlides.length}"/>
+                <div class="form-hint">Angka lebih kecil tampil lebih dulu. Bisa juga diatur lewat tombol panah di daftar slide.</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Status</label>
+                <select name="is_active" class="form-select">
+                    <option value="true" ${data?.is_active !== false ? 'selected' : ''}>Aktif (ditampilkan)</option>
+                    <option value="false" ${data?.is_active === false ? 'selected' : ''}>Nonaktif (disembunyikan)</option>
+                </select>
+            </div>
+        `;
+    }
+
+    return html;
+}
+
+// ============================================================
+// 23. SAVE DATA
+// ============================================================
+async function saveData(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    const data = {};
+    const fileInputs = {}; // simpan File object terpisah, jangan masuk ke `data` mentah-mentah
+
+    for (let [key, value] of formData.entries()) {
+        if (value instanceof File) {
+            if (value.size > 0) fileInputs[key] = value;
+            continue; // jangan masukkan File object ke payload Supabase
+        }
+        if (key === 'is_active' || key === 'is_cover') {
+            data[key] = value === 'true';
+        } else if (key === 'password' && !value) {
+            continue;
+        } else {
+            data[key] = value;
+        }
+    }
+
+    const submitBtn = document.getElementById('modalSubmit');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+
+    try {
+        // ===== UPLOAD FILE KE CLOUDINARY (jika ada) =====
+        if (fileInputs.cover_file) {
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengupload cover...';
+            const res = await uploadToCloudinary(fileInputs.cover_file);
+            data.cover = res.url;
+        }
+        if (fileInputs.foto_file) {
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengupload foto...';
+            const res = await uploadToCloudinary(fileInputs.foto_file);
+            data.foto = res.url;
+        }
+        if (fileInputs.gambar_file) {
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengupload gambar...';
+            const progressId = modalType === 'heroslide' ? 'heroUploadBar' : 'pengumumanUploadBar';
+            const progressWrap = modalType === 'heroslide' ? 'heroUploadProgress' : 'pengumumanUploadProgress';
+            const wrapEl = document.getElementById(progressWrap);
+            if (wrapEl) wrapEl.style.display = 'block';
+            const res = await uploadToCloudinary(fileInputs.gambar_file, (p) => {
+                const bar = document.getElementById(progressId);
+                if (bar) bar.style.width = p + '%';
+            });
+            data.gambar = res.url;
+        }
+        if (fileInputs.media_file) {
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengupload media...';
+            document.getElementById('mediaUploadProgress').style.display = 'block';
+            const res = await uploadToCloudinary(fileInputs.media_file, (p) => {
+                document.getElementById('mediaUploadBar').style.width = p + '%';
+            });
+            data.url = res.url;
+            // Otomatis deteksi tipe dari file asli, dan buat thumbnail untuk video
+            data.tipe = res.resourceType === 'video' ? 'video' : 'foto';
+            data.thumbnail = res.resourceType === 'video'
+                ? res.url.replace('/upload/', '/upload/c_thumb,w_500,h_500,so_0/').replace(/\.(mp4|mov|webm|mkv)$/i, '.jpg')
+                : res.url;
+        }
+
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+
+        // Hash password if present
+        if (data.password) {
+            data.password = await sha256(data.password);
+        }
+
+        // Hapus field kosong yang cuma jadi placeholder kalau memang tidak diisi ulang saat edit
+        if (editId) {
+            Object.keys(data).forEach(k => {
+                if ((k === 'cover' || k === 'gambar' || k === 'url' || k === 'foto') && data[k] === '' ) delete data[k];
+            });
+        }
+
+        let table = '';
+        let result;
+
+        switch (modalType) {
+            case 'user':
+                table = 'pengguna';
+                break;
+            case 'alumni':
+                table = 'alumni';
+                break;
+            case 'kelas':
+                table = 'kelas';
+                break;
+            case 'angkatan':
+                table = 'angkatan';
+                break;
+            case 'struktur':
+                table = 'struktur_organisasi';
+                break;
+            case 'album':
+                table = 'album';
+                break;
+            case 'media':
+                table = 'media';
+                break;
+            case 'pengumuman':
+                table = 'pengumuman';
+                break;
+            case 'heroslide':
+                table = 'hero_slides';
+                break;
+            default:
+                throw new Error('Unknown type');
+        }
+
+        if (editId) {
+            result = await sb.from(table).update(data).eq('id', editId);
+        } else {
+            result = await sb.from(table).insert([data]);
+        }
+
+        if (result.error) throw result.error;
+
+        // Log activity
+        await sb.from('activity_log').insert([{
+            pengguna_id: currentUser?.id,
+            action: editId ? 'update' : 'insert',
+            target_type: modalType,
+            target_id: editId || result.data?.[0]?.id,
+            data: { table, data },
+            ip_address: '127.0.0.1'
+        }]);
+
+        showToast(`Data ${modalType} berhasil ${editId ? 'diupdate' : 'ditambahkan'}!`);
+        closeModal();
+        await fetchAllData();
+        showSection(currentSection);
+
+    } catch (e) {
+        showToast('Gagal menyimpan: ' + e.message, 'error');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-save"></i> Simpan';
+    }
+}
+
+// ============================================================
+// 24. DELETE FUNCTIONS
+// ============================================================
+async function deleteRecord(table, id, name) {
+    if (!confirm(`Yakin ingin menghapus ${name} ini?`)) return;
+
+    try {
+        const { error } = await sb.from(table).delete().eq('id', id);
+        if (error) throw error;
+
+        await sb.from('activity_log').insert([{
+            pengguna_id: currentUser?.id,
+            action: 'delete',
+            target_type: table,
+            target_id: id,
+            ip_address: '127.0.0.1'
+        }]);
+
+        showToast(`${name} berhasil dihapus!`);
+        await fetchAllData();
+        showSection(currentSection);
+
+    } catch (e) {
+        showToast('Gagal menghapus: ' + e.message, 'error');
+    }
+}
+
+function deleteUser(id) { deleteRecord('pengguna', id, 'User'); }
+function deleteAlumni(id) { deleteRecord('alumni', id, 'Alumni'); }
+function deleteKelas(id) { deleteRecord('kelas', id, 'Kelas'); }
+function deleteAngkatan(id) { deleteRecord('angkatan', id, 'Angkatan'); }
+function deleteStruktur(id) { deleteRecord('struktur_organisasi', id, 'Struktur'); }
+function deleteAlbum(id) { deleteRecord('album', id, 'Album'); }
+function deleteMedia(id) { deleteRecord('media', id, 'Media'); }
+function deletePengumuman(id) { deleteRecord('pengumuman', id, 'Pengumuman'); }
+
+// ============================================================
+// 25. EDIT FUNCTIONS
+// ============================================================
+function editUser(id) { openModal('user', id); }
+function editAlumni(id) { openModal('alumni', id); }
+function editKelas(id) { openModal('kelas', id); }
+function editAngkatan(id) { openModal('angkatan', id); }
+function editStruktur(id) { openModal('struktur', id); }
+function editAlbum(id) { openModal('album', id); }
+function editMedia(id) { openModal('media', id); }
+function editPengumuman(id) { openModal('pengumuman', id); }
+
+// ============================================================
+// 26. CLEAR LOGS
+// ============================================================
+async function clearLogs() {
+    if (!confirm('Yakin ingin menghapus semua log?')) return;
+    try {
+        const { error } = await sb.from('activity_log').delete().neq('id', '');
+        if (error) throw error;
+        showToast('Log berhasil dihapus!');
+        await fetchAllData();
+        showSection('logs');
+    } catch (e) {
+        showToast('Gagal menghapus log: ' + e.message, 'error');
+    }
+}
+
+// ============================================================
+// 27. LOGOUT
+// ============================================================
+function logout() {
+    if (confirm('Yakin ingin logout?')) {
+        localStorage.removeItem('userSession');
+        window.location.href = 'login.html';
+    }
+}
+
+// ============================================================
+// 28. INIT
+// ============================================================
+initTheme();
+checkSession();
+fetchAllData();
+
+// Handle click outside modal
+document.getElementById('modal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeModal();
+});
+
+// Keyboard shortcut
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        if (document.getElementById('modal').classList.contains('active')) {
+            closeModal();
+        }
+    }
+});
+</script>
+</body>
+  </html>
